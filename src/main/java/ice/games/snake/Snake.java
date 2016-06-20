@@ -1,5 +1,7 @@
 package ice.games.snake;
 
+import ice.games.snake.adjudgement.Adjudicator;
+
 import java.awt.Color;
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -7,8 +9,12 @@ import java.util.Deque;
 import java.util.Random;
 
 import org.atmosphere.cpr.AtmosphereResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Snake {
+
+	private final static Logger logger = LoggerFactory.getLogger(Snake.class);
 
 	private static final Random randomForPosition = new Random();
 
@@ -89,7 +95,12 @@ public class Snake {
 		return value;
 	}
 
-	public synchronized void update(Collection<Snake> snakes) {
+	public synchronized void update(Adjudicator adjudicator) {
+		moveOneStep();
+		handleCollisions(adjudicator);
+	}
+
+	private void moveOneStep() {
 		Location nextLocation = head.getAdjacentLocation(direction);
 		if (nextLocation.x >= Settings.PLAYFIELD_WIDTH) {
 			nextLocation.x = 0;
@@ -110,42 +121,33 @@ public class Snake {
 			}
 			head = nextLocation;
 		}
-
-		handleCollisions(snakes);
 	}
 
-	private void handleCollisions(Collection<Snake> snakes) {
-		for (Snake snake : snakes) {
-			boolean headCollision = id != snake.id && snake.getHead().equals(head);
-			boolean tailCollision = snake.getTail().contains(head);
-			if (headCollision || tailCollision) {
-				if (id != snake.id) {
-					kill();
-					snake.reward();
-				} else {
-					suicide();
-				}
-			}
+	private void handleCollisions(Adjudicator adjudicator) {
+		try {
+			adjudicator.judge(this, SnakeGame.getSnakes());
+		} catch (Exception e) {
+			logger.error("handleCollisions: ", e);
 		}
 	}
 
-	private void suicide() {
+	public synchronized void suicide() {
 		resetState();
 		sendMessage(Settings.MESSAGE_SUICIDE);
 
 	}
 
-	private synchronized void kill() {
+	public synchronized void kill() {
 		resetState();
 		sendMessage(Settings.MESSAGE_DEAD);
 	}
 
-	private synchronized void reward() {
+	public synchronized void reward() {
 		length++;
 		sendMessage(Settings.MESSAGE_KILL);
 	}
 
-	public void sendMessage(String msg) {
+	private void sendMessage(String msg) {
 		resource.getResponse().write(msg);
 	}
 

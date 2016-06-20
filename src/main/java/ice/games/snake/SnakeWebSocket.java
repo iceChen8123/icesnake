@@ -29,30 +29,30 @@ import java.io.IOException;
  */
 // Uncomment if you want to only support WebSocket.
 //@WebSocketHandlerService(path = "/snake")
-public class SnakeWebSocket extends SnakeGame implements WebSocketHandler {
-
-    @Override
-    public void onTextMessage(WebSocket webSocket, String message) throws IOException {
-        onMessage(webSocket.resource(), message);
-    }
-
-    @Override
-    public void onOpen(WebSocket webSocket) throws IOException {
-        super.onOpen(webSocket.resource());
-    }
-
-    @Override
-    public void onClose(WebSocket webSocket) {
-        super.onClose(webSocket.resource());
-    }
-
-    @Override
-    public void onError(WebSocket webSocket, WebSocketProcessor.WebSocketException t) {
-    }
-
-    @Override
-    public void onByteMessage(WebSocket webSocket, byte[] data, int offset, int length) throws IOException {
-    }
-
-
-}
+//public class SnakeWebSocket extends SnakeGame implements WebSocketHandler {
+//
+//    @Override
+//    public void onTextMessage(WebSocket webSocket, String message) throws IOException {
+//        onMessage(webSocket.resource(), message);
+//    }
+//
+//    @Override
+//    public void onOpen(WebSocket webSocket) throws IOException {
+//        super.onOpen(webSocket.resource());
+//    }
+//
+//    @Override
+//    public void onClose(WebSocket webSocket) {
+//        super.onClose(webSocket.resource());
+//    }
+//
+//    @Override
+//    public void onError(WebSocket webSocket, WebSocketProcessor.WebSocketException t) {
+//    }
+//
+//    @Override
+//    public void onByteMessage(WebSocket webSocket, byte[] data, int offset, int length) throws IOException {
+//    }
+//
+//
+//}
