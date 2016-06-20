@@ -133,7 +133,7 @@ public class Snake {
 		sendMessage(Settings.MESSAGE_KILL);
 	}
 
-	public void sendMessage(String msg) {
+	private void sendMessage(String msg) {
 		resource.getResponse().write(msg);
 	}
 
