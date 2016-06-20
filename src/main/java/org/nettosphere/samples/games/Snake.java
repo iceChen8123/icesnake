@@ -119,18 +119,18 @@ public class Snake {
 
 	private void suicide() {
 		resetState();
-		sendMessage("{'type': 'suicide'}");
+		sendMessage(Settings.MESSAGE_SUICIDE);
 
 	}
 
 	private synchronized void kill() {
 		resetState();
-		sendMessage("{'type': 'dead'}");
+		sendMessage(Settings.MESSAGE_DEAD);
 	}
 
 	private synchronized void reward() {
 		length++;
-		sendMessage("{'type': 'kill'}");
+		sendMessage(Settings.MESSAGE_KILL);
 	}
 
 	private void sendMessage(String msg) {
