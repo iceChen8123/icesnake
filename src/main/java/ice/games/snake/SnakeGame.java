@@ -28,7 +28,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.nettosphere.samples.games;
+package ice.games.snake;
 
 import java.awt.Color;
 import java.io.IOException;

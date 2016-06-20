@@ -1,4 +1,4 @@
-package org.nettosphere.samples.games;
+package ice.games.snake;
 
 public class Settings {
 	public static final int PLAYFIELD_WIDTH = 800;

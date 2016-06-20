@@ -1,12 +1,13 @@
 package ice.snake;
 
+import ice.games.snake.SnakeManagedService;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.atmosphere.nettosphere.Config;
 import org.atmosphere.nettosphere.Nettosphere;
-import org.nettosphere.samples.games.SnakeManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

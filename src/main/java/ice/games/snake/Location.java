@@ -1,4 +1,4 @@
-package org.nettosphere.samples.games;
+package ice.games.snake;
 
 public class Location {
 

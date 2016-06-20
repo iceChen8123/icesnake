@@ -1,4 +1,4 @@
-package org.nettosphere.samples.games;
+package ice.games.snake;
 
 import java.util.Collection;
 import java.util.Collections;
