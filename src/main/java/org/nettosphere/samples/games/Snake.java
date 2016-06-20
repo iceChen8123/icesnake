@@ -1,34 +1,3 @@
-/*
- * Copyright 2012 Jeanfrancois Arcand
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.nettosphere.samples.games;
 
 import java.util.ArrayDeque;
@@ -40,17 +9,16 @@ import org.atmosphere.cpr.AtmosphereResource;
 
 public class Snake {
 
-	private static final int DEFAULT_LENGTH = 5;
 	private static final Random random = new Random();
 
-	private final int id;
 	private final AtmosphereResource resource;
 
+	private final int id;
 	private Direction direction;
-	private int length = DEFAULT_LENGTH;
+	private final String hexColor;
 	private Location head;
 	private final Deque<Location> tail = new ArrayDeque<Location>();
-	private final String hexColor;
+	private int length = Settings.DEFAULT_SNAKE_LENGTH;
 
 	public Snake(int id, AtmosphereResource resource) {
 		this.id = id;
@@ -59,14 +27,44 @@ public class Snake {
 		resetState();
 	}
 
+	public int getId() {
+		return id;
+	}
+
+	public String getHexColor() {
+		return hexColor;
+	}
+
+	public synchronized Location getHead() {
+		return head;
+	}
+
+	public synchronized Collection<Location> getTail() {
+		return tail;
+	}
+
+	public synchronized void setDirection(Direction direction) {
+		this.direction = direction;
+	}
+
+	public synchronized String getLocationsJson() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(head.x), Integer.valueOf(head.y)));
+		for (Location location : tail) {
+			sb.append(',');
+			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x), Integer.valueOf(location.y)));
+		}
+		return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(id), sb.toString());
+	}
+
 	private void resetState() {
 		this.direction = Direction.NONE;
 		this.head = getRandomLocation();
 		this.tail.clear();
-		this.length = DEFAULT_LENGTH;
+		this.length = Settings.DEFAULT_SNAKE_LENGTH;
 	}
 
-	public static Location getRandomLocation() {
+	private static Location getRandomLocation() {
 		int x = roundByGridSize(random.nextInt(Settings.PLAYFIELD_WIDTH));
 		int y = roundByGridSize(random.nextInt(Settings.PLAYFIELD_HEIGHT));
 		return new Location(x, y);
@@ -77,26 +75,6 @@ public class Snake {
 		value = value / Settings.GRID_SIZE;
 		value = value * Settings.GRID_SIZE;
 		return value;
-	}
-
-	private void suicide() {
-		resetState();
-		sendMessage("{'type': 'suicide'}");
-
-	}
-
-	private synchronized void kill() {
-		resetState();
-		sendMessage("{'type': 'dead'}");
-	}
-
-	private synchronized void reward() {
-		length++;
-		sendMessage("{'type': 'kill'}");
-	}
-
-	protected void sendMessage(String msg) {
-		resource.getResponse().write(msg);
 	}
 
 	public synchronized void update(Collection<Snake> snakes) {
@@ -139,33 +117,24 @@ public class Snake {
 		}
 	}
 
-	public synchronized Location getHead() {
-		return head;
+	private void suicide() {
+		resetState();
+		sendMessage("{'type': 'suicide'}");
+
 	}
 
-	public synchronized Collection<Location> getTail() {
-		return tail;
+	private synchronized void kill() {
+		resetState();
+		sendMessage("{'type': 'dead'}");
 	}
 
-	public synchronized void setDirection(Direction direction) {
-		this.direction = direction;
+	private synchronized void reward() {
+		length++;
+		sendMessage("{'type': 'kill'}");
 	}
 
-	public synchronized String getLocationsJson() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(head.x), Integer.valueOf(head.y)));
-		for (Location location : tail) {
-			sb.append(',');
-			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x), Integer.valueOf(location.y)));
-		}
-		return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(id), sb.toString());
+	private void sendMessage(String msg) {
+		resource.getResponse().write(msg);
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public String getHexColor() {
-		return hexColor;
-	}
 }
