@@ -31,6 +31,10 @@
 package ice.games.snake;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.atmosphere.cpr.AtmosphereResource;
@@ -40,10 +44,16 @@ public class SnakeGame {
 
 	protected static final AtomicInteger snakeIds = new AtomicInteger(0);
 
+	private final ConcurrentHashMap<Integer, Snake> snakes = new ConcurrentHashMap<Integer, Snake>();
+
 	protected final SnakeBroadcaster snakeBroadcaster;
 
 	public SnakeGame() {
-		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true));
+		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
+	}
+
+	public Collection<Snake> getSnakes() {
+		return Collections.unmodifiableCollection(snakes.values());
 	}
 
 	public void onOpen(AtmosphereResource resource) throws IOException {
@@ -52,14 +62,47 @@ public class SnakeGame {
 		Snake snake = new Snake(id, resource);
 		resource.session().setAttribute("snake", snake);
 
-		snakeBroadcaster.addSnake(snake);
+		addSnake(snake);
+	}
+
+	private synchronized void addSnake(Snake snake) {
+		snakes.put(Integer.valueOf(snake.getId()), snake);
+
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
+			// 新添加一条时,需要将所有的广播一遍,其实只需要向新增加的广播所有，而像其他广播新增一条,但是这样写，比较容易。因为页面上直接用id去找蛇的，所以如果新增后，不广播所有，那么新增的蛇，会看不到其他的蛇。
+			snake = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
 	}
 
 	public void onClose(AtmosphereResource resource) {
-		snakeBroadcaster.removeSnake(snake(resource));
+		Integer id = Integer.parseInt(resource.session().getAttribute("id").toString());
+		snakes.remove(id);
+		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", id));
 	}
 
-	protected Snake snake(AtmosphereResource resource) {
+	public String getSnakeInfo() {
+		if (getSnakes() == null || getSnakes().isEmpty()) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
+			Snake snake = iterator.next();
+			snake.update(getSnakes());
+			sb.append(snake.getLocationsJson());
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		return sb.toString();
+	}
+
+	private Snake snake(AtmosphereResource resource) {
 		return (Snake) resource.session().getAttribute("snake");
 	}
 
