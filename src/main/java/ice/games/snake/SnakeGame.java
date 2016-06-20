@@ -27,35 +27,21 @@ public class SnakeGame {
 
 	private final static Logger logger = LoggerFactory.getLogger(SnakeGame.class);
 
-	private final static AtomicInteger num = new AtomicInteger(0);
-
-	public SnakeGame() {
-		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
-//					Snake snake = iterator.next();
-//					snake.update(adjudicator);
-//				}
-//			}
-//		}).start();
-		logger.info("游戏跑起来...." + num.incrementAndGet());
+	static {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
+					Snake snake = iterator.next();
+					snake.update(adjudicator);
+				}
+			}
+		}).start();
+		logger.info("游戏跑起来....");
 	}
 
-	public String getSnakeInfo() {
-		if (getSnakes() == null || getSnakes().isEmpty()) {
-			return "";
-		}
-		StringBuilder sb = new StringBuilder();
-		for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
-			Snake snake = iterator.next();
-			sb.append(snake.getLocationsJson());
-			if (iterator.hasNext()) {
-				sb.append(',');
-			}
-		}
-		return sb.toString();
+	public SnakeGame() {
+		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true));
 	}
 
 	void onOpen(AtmosphereResource resource) throws IOException {
@@ -80,26 +66,22 @@ public class SnakeGame {
 		}
 	}
 
-	void onClose(AtmosphereResource resource) {
+	synchronized void onClose(AtmosphereResource resource) {
 		Integer id = Integer.parseInt(resource.session().getAttribute("id").toString());
 		logger.info(id + " 下线了......");
-		synchronized (snakes) {
-			snakes.remove(id);
-		}
+		snakes.remove(id);
 		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", id));
 	}
 
-	private void addSnake(Snake snake) {
+	private synchronized void addSnake(Snake snake) {
 		StringBuilder sb = new StringBuilder();
-		synchronized (snakes) {
-			snakes.put(Integer.valueOf(snake.getId()), snake);
-			for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
-				// 新添加一条时,需要将所有的广播一遍,其实只需要向新增加的广播所有，而像其他广播新增一条,但是这样写，比较容易。因为页面上直接用id去找蛇的，所以如果新增后，不广播所有，那么新增的蛇，会看不到其他的蛇。
-				snake = iterator.next();
-				sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
-				if (iterator.hasNext()) {
-					sb.append(',');
-				}
+		snakes.put(Integer.valueOf(snake.getId()), snake);
+		for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
+			// 新添加一条时,需要将所有的广播一遍,其实只需要向新增加的广播所有，而像其他广播新增一条,但是这样写，比较容易。因为页面上直接用id去找蛇的，所以如果新增后，不广播所有，那么新增的蛇，会看不到其他的蛇。
+			snake = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
+			if (iterator.hasNext()) {
+				sb.append(',');
 			}
 		}
 		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));

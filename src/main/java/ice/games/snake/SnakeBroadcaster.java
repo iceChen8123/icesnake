@@ -1,5 +1,7 @@
 package ice.games.snake;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -18,10 +20,7 @@ public class SnakeBroadcaster {
 
 	private final Broadcaster broadcaster;
 
-	private SnakeGame snakeGame;
-
-	public SnakeBroadcaster(Broadcaster broadcaster, SnakeGame snakeGame) {
-		this.snakeGame = snakeGame;
+	public SnakeBroadcaster(Broadcaster broadcaster) {
 		this.broadcaster = broadcaster;
 		startTimer();
 	}
@@ -32,7 +31,23 @@ public class SnakeBroadcaster {
 	}
 
 	private String tick() {
-		return String.format("{'type': 'update', 'data' : [%s]}", snakeGame.getSnakeInfo());
+		return String.format("{'type': 'update', 'data' : [%s]}", getSnakeInfo());
+	}
+
+	private String getSnakeInfo() {
+		Collection<Snake> snakes = SnakeGame.getSnakes();
+		if (snakes == null || snakes.isEmpty()) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = SnakeGame.getSnakes().iterator(); iterator.hasNext();) {
+			Snake snake = iterator.next();
+			sb.append(snake.getLocationsJson());
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		return sb.toString();
 	}
 
 	private void startTimer() {
