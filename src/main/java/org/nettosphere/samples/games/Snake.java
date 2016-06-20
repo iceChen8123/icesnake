@@ -34,12 +34,14 @@ package org.nettosphere.samples.games;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Random;
 
 import org.atmosphere.cpr.AtmosphereResource;
 
 public class Snake {
 
 	private static final int DEFAULT_LENGTH = 5;
+	private static final Random random = new Random();
 
 	private final int id;
 	private final AtmosphereResource resource;
@@ -59,9 +61,28 @@ public class Snake {
 
 	private void resetState() {
 		this.direction = Direction.NONE;
-		this.head = SnakeWebSocket.getRandomLocation();
+		this.head = getRandomLocation();
 		this.tail.clear();
 		this.length = DEFAULT_LENGTH;
+	}
+
+	public static Location getRandomLocation() {
+		int x = roundByGridSize(random.nextInt(Settings.PLAYFIELD_WIDTH));
+		int y = roundByGridSize(random.nextInt(Settings.PLAYFIELD_HEIGHT));
+		return new Location(x, y);
+	}
+
+	private static int roundByGridSize(int value) {
+		value = value + (Settings.GRID_SIZE / 2);
+		value = value / Settings.GRID_SIZE;
+		value = value * Settings.GRID_SIZE;
+		return value;
+	}
+
+	private void suicide() {
+		resetState();
+		sendMessage("{'type': 'suicide'}");
+
 	}
 
 	private synchronized void kill() {
@@ -108,9 +129,11 @@ public class Snake {
 			boolean headCollision = id != snake.id && snake.getHead().equals(head);
 			boolean tailCollision = snake.getTail().contains(head);
 			if (headCollision || tailCollision) {
-				kill();
 				if (id != snake.id) {
+					kill();
 					snake.reward();
+				} else {
+					suicide();
 				}
 			}
 		}

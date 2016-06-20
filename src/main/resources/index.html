@@ -239,6 +239,10 @@ Game.connect = (function (host) {
                 Console.log('小蛇蛇死了....拜拜...');
                 Game.direction = 'none';
                 break;
+            case 'suicide':
+                Console.log('恭喜你,完美的追了自己的尾...^_^');
+                Game.direction = 'none';
+                break;
             case 'kill':
                 Console.log(' 爆头~屌爆了...');
                 break;

@@ -30,18 +30,16 @@
  */
 package org.nettosphere.samples.games;
 
-import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.BroadcasterFactory;
-
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SnakeGame {
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.BroadcasterFactory;
 
-	public static final int GRID_SIZE = 10;
+public class SnakeGame {
 
 	protected static final AtomicInteger snakeIds = new AtomicInteger(0);
 	protected static final Random random = new Random();
@@ -58,19 +56,6 @@ public class SnakeGame {
 		float luminance = 0.9f;
 		Color color = Color.getHSBColor(hue, saturation, luminance);
 		return '#' + Integer.toHexString((color.getRGB() & 0xffffff) | 0x1000000).substring(1);
-	}
-
-	public static Location getRandomLocation() {
-		int x = roundByGridSize(random.nextInt(Settings.PLAYFIELD_WIDTH));
-		int y = roundByGridSize(random.nextInt(Settings.PLAYFIELD_HEIGHT));
-		return new Location(x, y);
-	}
-
-	private static int roundByGridSize(int value) {
-		value = value + (GRID_SIZE / 2);
-		value = value / GRID_SIZE;
-		value = value * GRID_SIZE;
-		return value;
 	}
 
 	public void onOpen(AtmosphereResource resource) throws IOException {
