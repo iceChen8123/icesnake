@@ -38,6 +38,17 @@ public class SnakeBroadcaster {
 			startTimer();
 		}
 		snakes.put(Integer.valueOf(snake.getId()), snake);
+
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
+			// 新添加一条时,需要将所有的广播一遍,其实只需要向新增加的广播所有，而像其他广播新增一条,但是这样写，比较容易。因为页面上直接用id去找蛇的，所以如果新增后，不广播所有，那么新增的蛇，会看不到其他的蛇。
+			snake = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
 	}
 
 	protected Collection<Snake> getSnakes() {
@@ -46,6 +57,7 @@ public class SnakeBroadcaster {
 
 	protected synchronized void removeSnake(Snake snake) {
 		snakes.remove(Integer.valueOf(snake.getId()));
+		broadcast(String.format("{'type': 'leave', 'id': %d}", snake.getId()));
 	}
 
 	protected String tick() {

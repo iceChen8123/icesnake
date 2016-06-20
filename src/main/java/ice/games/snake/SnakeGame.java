@@ -30,10 +30,7 @@
  */
 package ice.games.snake;
 
-import java.awt.Color;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.atmosphere.cpr.AtmosphereResource;
@@ -42,44 +39,24 @@ import org.atmosphere.cpr.BroadcasterFactory;
 public class SnakeGame {
 
 	protected static final AtomicInteger snakeIds = new AtomicInteger(0);
-	protected static final Random random = new Random();
+
 	protected final SnakeBroadcaster snakeBroadcaster;
 
 	public SnakeGame() {
 		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true));
 	}
 
-	public static String getRandomHexColor() {
-		float hue = random.nextFloat();
-		// sat between 0.1 and 0.3
-		float saturation = (random.nextInt(2000) + 1000) / 10000f;
-		float luminance = 0.9f;
-		Color color = Color.getHSBColor(hue, saturation, luminance);
-		return '#' + Integer.toHexString((color.getRGB() & 0xffffff) | 0x1000000).substring(1);
-	}
-
 	public void onOpen(AtmosphereResource resource) throws IOException {
 		int id = snakeIds.getAndIncrement();
 		resource.session().setAttribute("id", id);
 		Snake snake = new Snake(id, resource);
-
 		resource.session().setAttribute("snake", snake);
+
 		snakeBroadcaster.addSnake(snake);
-		StringBuilder sb = new StringBuilder();
-		for (Iterator<Snake> iterator = snakeBroadcaster.getSnakes().iterator(); iterator.hasNext();) {
-			snake = iterator.next();
-			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
-			if (iterator.hasNext()) {
-				sb.append(',');
-			}
-		}
-		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
 	}
 
 	public void onClose(AtmosphereResource resource) {
 		snakeBroadcaster.removeSnake(snake(resource));
-		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", ((Integer) resource.session()
-				.getAttribute("id"))));
 	}
 
 	protected Snake snake(AtmosphereResource resource) {

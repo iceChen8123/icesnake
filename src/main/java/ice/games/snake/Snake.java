@@ -1,5 +1,6 @@
 package ice.games.snake;
 
+import java.awt.Color;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -9,7 +10,9 @@ import org.atmosphere.cpr.AtmosphereResource;
 
 public class Snake {
 
-	private static final Random random = new Random();
+	private static final Random randomForPosition = new Random();
+
+	private static final Random randomForColor = new Random();
 
 	private final AtmosphereResource resource;
 
@@ -22,9 +25,18 @@ public class Snake {
 
 	public Snake(int id, AtmosphereResource resource) {
 		this.id = id;
-		this.hexColor = SnakeWebSocket.getRandomHexColor();
+		this.hexColor = getRandomHexColor();
 		this.resource = resource;
 		resetState();
+	}
+
+	private static String getRandomHexColor() {
+		float hue = randomForColor.nextFloat();
+		// sat between 0.1 and 0.3
+		float saturation = (randomForColor.nextInt(2000) + 1000) / 10000f;
+		float luminance = 0.9f;
+		Color color = Color.getHSBColor(hue, saturation, luminance);
+		return '#' + Integer.toHexString((color.getRGB() & 0xffffff) | 0x1000000).substring(1);
 	}
 
 	public int getId() {
@@ -65,8 +77,8 @@ public class Snake {
 	}
 
 	private static Location getRandomLocation() {
-		int x = roundByGridSize(random.nextInt(Settings.PLAYFIELD_WIDTH));
-		int y = roundByGridSize(random.nextInt(Settings.PLAYFIELD_HEIGHT));
+		int x = roundByGridSize(randomForPosition.nextInt(Settings.PLAYFIELD_WIDTH));
+		int y = roundByGridSize(randomForPosition.nextInt(Settings.PLAYFIELD_HEIGHT));
 		return new Location(x, y);
 	}
 

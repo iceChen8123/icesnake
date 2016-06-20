@@ -234,6 +234,7 @@ Game.connect = (function (host) {
                 break;
             case 'leave':
                 Game.removeSnake(packet.id);
+				Console.log('退出了一条小蛇蛇....'+packet.id);
                 break;
             case 'dead':
                 Console.log('小蛇蛇死了....拜拜...');
