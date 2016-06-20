@@ -63,8 +63,14 @@ function Snake() {
 }
 
 Snake.prototype.draw = function (context) {
-    for (var id in this.snakeBody) {
-        context.fillStyle = this.color;
+    var isfirst = true;
+	for (var id in this.snakeBody) {
+    	if(isfirst){
+    		isfirst = false;
+	        context.fillStyle = 'red';
+    	}else{
+	        context.fillStyle = this.color;
+    	}
         context.fillRect(this.snakeBody[id].x, this.snakeBody[id].y, Game.gridSize, Game.gridSize);
     }
 };
@@ -194,7 +200,7 @@ Game.connect = (function (host) {
 	};
 
 	request.onReconnect = function(request, response) {
-		Console.log('重连中....');
+		Console.log('重连ok....');
 	};
 	
 	request.onReopen = function(response) {
