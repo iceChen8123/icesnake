@@ -1,39 +1,9 @@
-/*
- * Copyright 2012 Jeanfrancois Arcand
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package ice.games.snake;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +23,8 @@ public class SnakeBroadcaster {
 
 	private final ConcurrentHashMap<Integer, Snake> snakes = new ConcurrentHashMap<Integer, Snake>();
 
+	private final LinkedList<Snake> waitqueue = new LinkedList<Snake>();
+
 	private final Broadcaster broadcaster;
 
 	public SnakeBroadcaster(Broadcaster broadcaster) {
@@ -63,7 +35,14 @@ public class SnakeBroadcaster {
 		if (snakes.size() == 0) {
 			startTimer();
 		}
-		snakes.put(Integer.valueOf(snake.getId()), snake);
+		if (snakes.size() >= 2) {
+			logger.info("超额了...");
+			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,您前面还有  %s 条蛇蛇在焦急等待...'}", waitqueue.size()
+					+ ""));
+			waitqueue.add(snake);
+		} else {
+			snakes.put(Integer.valueOf(snake.getId()), snake);
+		}
 	}
 
 	protected Collection<Snake> getSnakes() {
@@ -72,6 +51,7 @@ public class SnakeBroadcaster {
 
 	protected synchronized void removeSnake(Snake snake) {
 		snakes.remove(Integer.valueOf(snake.getId()));
+		waitqueue.remove(snake);
 	}
 
 	protected String tick() {

@@ -144,7 +144,9 @@ Game.draw = function () {
     }
 };
 
+var meid ;
 Game.addSnake = function (id, color) {
+	meid = id;
     Game.entities[id] = new Snake();
     Game.entities[id].color = color;
 };
@@ -245,6 +247,7 @@ Game.connect = (function (host) {
             case 'dead':
                 Console.log('小蛇蛇死了....拜拜...');
                 Game.direction = 'none';
+                Game.removeSnake(meid);
                 break;
             case 'suicide':
                 Console.log('恭喜你,完美的追了自己的尾...^_^');
@@ -252,6 +255,10 @@ Game.connect = (function (host) {
                 break;
             case 'kill':
                 Console.log('你kill了一只可爱的小蛇蛇...');
+                break;
+            case 'wait':
+                Console.log("人满了...........");
+                Console.log(packet.data);
                 break;
         }
     };

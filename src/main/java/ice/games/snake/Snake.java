@@ -105,13 +105,16 @@ public class Snake {
 
 	private void handleCollisions(Collection<Snake> snakes) {
 		for (Snake snake : snakes) {
-			boolean headCollision = id != snake.id && snake.getHead().equals(head);
-			boolean tailCollision = snake.getTail().contains(head);
-			if (headCollision || tailCollision) {
-				if (id != snake.getId()) {
+			if (id != snake.id) {
+				boolean headCollision = snake.getHead().equals(head);
+				boolean tailCollision = snake.getTail().contains(head);
+				if (headCollision || tailCollision) {
 					dead();
 					snake.reward();
-				} else {
+				}
+			} else {
+				boolean tailCollision = snake.getTail().contains(head);
+				if (tailCollision) {
 					suicide();
 				}
 			}

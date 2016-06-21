@@ -24,7 +24,6 @@ public class SnakeGame {
 		int id = snakeIds.getAndIncrement();
 		resource.session().setAttribute("id", id);
 		Snake snake = new Snake(id, resource);
-
 		resource.session().setAttribute("snake", snake);
 		snakeBroadcaster.addSnake(snake);
 		StringBuilder sb = new StringBuilder();
