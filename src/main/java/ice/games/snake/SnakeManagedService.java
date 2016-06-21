@@ -42,7 +42,7 @@ public class SnakeManagedService extends SnakeGame {
 //				if (s != null && s.equalsIgnoreCase(HeaderConfig.DISCONNECT)) {
 					SnakeManagedService.super.onClose(resource);
 					uuids.remove(resource.uuid());
-				//				}
+				// }
 			}
 		});
 	}

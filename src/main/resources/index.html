@@ -248,9 +248,9 @@ Game.connect = (function (host) {
 				Console.log('退出了一条小蛇蛇....'+packet.id);
                 break;
             case 'dead':
-                Console.log('小蛇蛇死了....拜拜...');
+                Console.log('小蛇蛇 '+packet.id+' 死了....拜拜...');
+                Game.removeSnake(packet.id);
                 Game.direction = 'none';
-                Game.removeSnake(meid);
                 break;
             case 'suicide':
                 Console.log('恭喜你,完美的追了自己的尾...^_^');
@@ -273,7 +273,7 @@ Console.log = (function (message) {
     p.style.wordWrap = 'break-word';
     p.innerHTML = message;
     console.appendChild(p);
-    while (console.childNodes.length > 10) {
+    while (console.childNodes.length > 100) {
         console.removeChild(console.firstChild);
     }
     console.scrollTop = console.scrollHeight;

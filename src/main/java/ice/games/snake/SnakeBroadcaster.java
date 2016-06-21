@@ -1,5 +1,7 @@
 package ice.games.snake;
 
+import ice.games.snake.Snake.SnakeStatus;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -43,8 +45,39 @@ public class SnakeBroadcaster {
 					waitqueue.size()));
 			waitqueue.add(snake);
 		} else {
-			snake.startPlay();
-			snakes.put(Integer.valueOf(snake.getId()), snake);
+			startplay(snake);
+		}
+	}
+
+	private void startplay(Snake snake) {
+		snake.startPlay();
+		snakes.put(Integer.valueOf(snake.getId()), snake);
+		broadcastPlayingSnakeInfo();
+	}
+
+	private synchronized void removeDeadSnake(Snake snake) {
+		broadcast(String.format("{'type': 'dead', 'id': %d}", snake.getId()));
+		snakes.remove(Integer.valueOf(snake.getId()));
+		addSnake(snake);
+		activeWaitSnake();
+	}
+
+	private void broadcastPlayingSnakeInfo() {
+		Snake snake;
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
+			snake = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+	}
+
+	private void activeWaitSnake() {
+		if (waitqueue.size() > 0) {
+			startplay(waitqueue.removeFirst());
 		}
 	}
 
@@ -88,9 +121,13 @@ public class SnakeBroadcaster {
 				for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
 					Snake snake = iterator.next();
 					snake.update(getPlayingSnakes());
-					sb.append(snake.getLocationsJson());
-					if (iterator.hasNext()) {
-						sb.append(',');
+					if (snake.getStatus() == SnakeStatus.dead) {
+						removeDeadSnake(snake);
+					} else {
+						sb.append(snake.getLocationsJson());
+						if (iterator.hasNext()) {
+							sb.append(',');
+						}
 					}
 				}
 				return String.format("{'type': 'update', 'data' : [%s]}", sb.toString());

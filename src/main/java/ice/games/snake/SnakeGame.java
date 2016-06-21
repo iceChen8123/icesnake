@@ -25,16 +25,20 @@ public class SnakeGame {
 		resource.session().setAttribute("id", id);
 		Snake snake = new Snake(id, resource);
 		resource.session().setAttribute("snake", snake);
-		snakeBroadcaster.addSnake(snake);
+
+		Snake snaketemp;
 		StringBuilder sb = new StringBuilder();
 		for (Iterator<Snake> iterator = snakeBroadcaster.getPlayingSnakes().iterator(); iterator.hasNext();) {
-			snake = iterator.next();
-			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
+			snaketemp = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snaketemp.getId()),
+					snaketemp.getHexColor()));
 			if (iterator.hasNext()) {
 				sb.append(',');
 			}
 		}
-		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+		snake.sendMessage(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+
+		snakeBroadcaster.addSnake(snake);
 	}
 
 	public void onClose(AtmosphereResource resource) {
