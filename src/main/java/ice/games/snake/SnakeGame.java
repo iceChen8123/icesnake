@@ -36,7 +36,7 @@ public class SnakeGame {
 				sb.append(',');
 			}
 		}
-		snake.sendMessage(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+		snake.sendMessage(String.format("{'type': 'playinginfo','data':[%s]}", sb.toString()));
 
 		snakeBroadcaster.addSnake(snake);
 	}

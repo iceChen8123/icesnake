@@ -40,24 +40,18 @@ public class SnakeBroadcaster {
 	}
 
 	synchronized void addSnake(Snake snake) {
+		waitqueue.add(snake);
 		if (snakes.size() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
 					waitqueue.size()));
-			waitqueue.add(snake);
 		} else {
-			startplay(snake);
+			activeWaitSnake();
 		}
 	}
 
-	private void startplay(Snake snake) {
-		snake.startPlay();
-		snakes.put(Integer.valueOf(snake.getId()), snake);
-		broadcastPlayingSnakeInfo();
-	}
-
 	private synchronized void removeDeadSnake(Snake snake) {
-		broadcast(String.format("{'type': 'dead', 'id': %d}", snake.getId()));
 		snakes.remove(Integer.valueOf(snake.getId()));
+		broadcast(String.format("{'type': 'dead', 'id': %d}", snake.getId()));
 		addSnake(snake);
 		activeWaitSnake();
 	}
@@ -77,7 +71,10 @@ public class SnakeBroadcaster {
 
 	private void activeWaitSnake() {
 		if (waitqueue.size() > 0) {
-			startplay(waitqueue.removeFirst());
+			Snake firstWait = waitqueue.removeFirst();
+			firstWait.startPlay();
+			snakes.put(Integer.valueOf(firstWait.getId()), firstWait);
+			broadcastPlayingSnakeInfo();
 		}
 	}
 
