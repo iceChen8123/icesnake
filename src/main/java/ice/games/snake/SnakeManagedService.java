@@ -1,4 +1,3 @@
-
 package ice.games.snake;
 
 import java.io.IOException;
@@ -39,9 +38,10 @@ public class SnakeManagedService extends SnakeGame {
 			public void onDisconnect(AtmosphereResourceEvent event) {
 				AtmosphereRequest request = event.getResource().getRequest();
 				String s = request.getHeader(HeaderConfig.X_ATMOSPHERE_TRANSPORT);
-//				if (s != null && s.equalsIgnoreCase(HeaderConfig.DISCONNECT)) {
-					SnakeManagedService.super.onClose(resource);
-					uuids.remove(resource.uuid());
+				// if (s != null && s.equalsIgnoreCase(HeaderConfig.DISCONNECT))
+				// {
+				SnakeManagedService.super.onClose(resource);
+				uuids.remove(resource.uuid());
 				// }
 			}
 		});
@@ -51,7 +51,7 @@ public class SnakeManagedService extends SnakeGame {
 	public void onMessage(AtmosphereResource resource) {
 		try {
 			// Here we need to find the suspended AtmosphereResource
-			SnakeManagedService.super.onMessage(AtmosphereResourceFactory.getDefault().find(resource.uuid()), resource
+			MessageListener.onMessage(AtmosphereResourceFactory.getDefault().find(resource.uuid()), resource
 					.getRequest().getReader().readLine());
 		} catch (IOException e) {
 			e.printStackTrace();

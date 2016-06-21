@@ -8,8 +8,6 @@ public class Settings {
 
 	public static final String MESSAGE_KILL = "{'type': 'kill'}";
 
-	public static final String MESSAGE_DEAD = "{'type': 'dead'}";
-
 	public static final String MESSAGE_SUICIDE = "{'type': 'suicide'}";
 
 }

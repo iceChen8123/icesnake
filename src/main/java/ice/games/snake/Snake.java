@@ -74,7 +74,6 @@ public class Snake {
 	private synchronized void dead() {
 		status = SnakeStatus.dead;
 		resetState();
-		sendMessage(Settings.MESSAGE_DEAD);
 	}
 
 	private synchronized void reward() {
