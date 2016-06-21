@@ -27,7 +27,7 @@ public class SnakeGame {
 		resource.session().setAttribute("snake", snake);
 		snakeBroadcaster.addSnake(snake);
 		StringBuilder sb = new StringBuilder();
-		for (Iterator<Snake> iterator = snakeBroadcaster.getSnakes().iterator(); iterator.hasNext();) {
+		for (Iterator<Snake> iterator = snakeBroadcaster.getPlayingSnakes().iterator(); iterator.hasNext();) {
 			snake = iterator.next();
 			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
 			if (iterator.hasNext()) {
@@ -39,7 +39,7 @@ public class SnakeGame {
 
 	public void onClose(AtmosphereResource resource) {
 		snakeBroadcaster.removeResource(resource);
-		snakeBroadcaster.removeSnake(snake(resource));
+		snakeBroadcaster.removeOffLineSnake(snake(resource));
 		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", ((Integer) resource.session()
 				.getAttribute("id"))));
 	}

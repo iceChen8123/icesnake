@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SnakeBroadcaster {
 
+	private static final int MAX_ALIVE_SNAKE = 2;
+
 	private final static Logger logger = LoggerFactory.getLogger(SnakeBroadcaster.class);
 
 	private final long TICK_DELAY = 100;
@@ -35,29 +37,29 @@ public class SnakeBroadcaster {
 		startTimer();
 	}
 
-	protected synchronized void addSnake(Snake snake) {
-		if (snakes.size() >= 2) {
-			logger.info("超额了...");
-			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,您前面还有  %s 条蛇蛇在焦急等待...'}", waitqueue.size()
-					+ ""));
+	synchronized void addSnake(Snake snake) {
+		if (snakes.size() >= MAX_ALIVE_SNAKE) {
+			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
+					waitqueue.size()));
 			waitqueue.add(snake);
 		} else {
+			snake.startPlay();
 			snakes.put(Integer.valueOf(snake.getId()), snake);
 		}
 	}
 
-	protected Collection<Snake> getSnakes() {
-		return Collections.unmodifiableCollection(snakes.values());
-	}
-
-	protected synchronized void removeSnake(Snake snake) {
+	synchronized void removeOffLineSnake(Snake snake) {
 		snakes.remove(Integer.valueOf(snake.getId()));
 		waitqueue.remove(snake);
 	}
 
+	Collection<Snake> getPlayingSnakes() {
+		return Collections.unmodifiableCollection(snakes.values());
+	}
+
 	private ReentrantLock broadcastLock = new ReentrantLock();
 
-	protected void broadcast(String message) {
+	void broadcast(String message) {
 		broadcastLock.lock();
 		try {
 			Future<Object> broadcast = broadcaster.broadcast(message);
@@ -69,7 +71,7 @@ public class SnakeBroadcaster {
 		}
 	}
 
-	public void startTimer() {
+	private void startTimer() {
 		broadcaster.scheduleFixedBroadcast(new Callable<String>() {
 			@Override
 			public String call() {
@@ -83,9 +85,9 @@ public class SnakeBroadcaster {
 
 			private String tick() {
 				StringBuilder sb = new StringBuilder();
-				for (Iterator<Snake> iterator = getSnakes().iterator(); iterator.hasNext();) {
+				for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
 					Snake snake = iterator.next();
-					snake.update(getSnakes());
+					snake.update(getPlayingSnakes());
 					sb.append(snake.getLocationsJson());
 					if (iterator.hasNext()) {
 						sb.append(',');
@@ -96,7 +98,7 @@ public class SnakeBroadcaster {
 		}, TICK_DELAY, TICK_DELAY, TimeUnit.MILLISECONDS);
 	}
 
-	public void removeResource(AtmosphereResource resource) {
+	synchronized void removeResource(AtmosphereResource resource) {
 		broadcaster.removeAtmosphereResource(resource);
 	}
 }

@@ -10,23 +10,29 @@ import org.atmosphere.cpr.AtmosphereResource;
 
 public class Snake {
 
-	private final int id;
-	private final AtmosphereResource resource;
-
-	private Direction direction;
-	private int length = Settings.DEFAULT_SNAKE_LENGTH;
-	private Location head;
-	private final Deque<Location> tail = new ArrayDeque<Location>();
-	private final String hexColor;
+	public enum SnakeStatus {
+		wait, start, dead;
+	}
 
 	private static final Random randomForPosition = new Random();
 	private static final Random randomForColor = new Random();
+
+	private final int id;
+	private int length = Settings.DEFAULT_SNAKE_LENGTH;
+	private final Deque<Location> tail = new ArrayDeque<Location>();
+	private SnakeStatus status;
+	private Direction direction;
+	private Location head;
+	private final String hexColor;
+
+	private final AtmosphereResource resource;
 
 	public Snake(int id, AtmosphereResource resource) {
 		this.id = id;
 		this.hexColor = getRandomHexColor();
 		this.resource = resource;
 		resetState();
+		this.status = SnakeStatus.wait;
 	}
 
 	private void resetState() {
@@ -59,12 +65,14 @@ public class Snake {
 	}
 
 	private synchronized void suicide() {
+		status = SnakeStatus.dead;
 		resetState();
 		sendMessage(Settings.MESSAGE_SUICIDE);
 
 	}
 
 	private synchronized void dead() {
+		status = SnakeStatus.dead;
 		resetState();
 		sendMessage(Settings.MESSAGE_DEAD);
 	}
@@ -150,4 +158,13 @@ public class Snake {
 	public String getHexColor() {
 		return hexColor;
 	}
+
+	public SnakeStatus getStatus() {
+		return status;
+	}
+
+	public void startPlay() {
+		status = SnakeStatus.start;
+	}
+
 }
