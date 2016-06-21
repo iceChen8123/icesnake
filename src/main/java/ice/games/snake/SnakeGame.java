@@ -38,6 +38,7 @@ public class SnakeGame {
 	}
 
 	public void onClose(AtmosphereResource resource) {
+		snakeBroadcaster.removeResource(resource);
 		snakeBroadcaster.removeSnake(snake(resource));
 		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", ((Integer) resource.session()
 				.getAttribute("id"))));
