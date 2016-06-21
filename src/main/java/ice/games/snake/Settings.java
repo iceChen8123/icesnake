@@ -12,5 +12,4 @@ public class Settings {
 
 	public static final String MESSAGE_SUICIDE = "{'type': 'suicide'}";
 
-	public static final String MESSAGE_WAIT = "{'type': 'wait'}";
 }

@@ -230,6 +230,9 @@ Game.connect = (function (host) {
         }
 
         switch (packet.type) {
+	        case 'wait':
+	            Console.log(packet.data);
+	            break;
             case 'update':
                 for (var i = 0; i < packet.data.length; i++) {
                     Game.updateSnake(packet.data[i].id, packet.data[i].body);
@@ -255,10 +258,6 @@ Game.connect = (function (host) {
                 break;
             case 'kill':
                 Console.log('你kill了一只可爱的小蛇蛇...');
-                break;
-            case 'wait':
-                Console.log("人满了...........");
-                Console.log(packet.data);
                 break;
         }
     };
