@@ -3,6 +3,7 @@ package ice.games.snake;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -22,22 +23,26 @@ public class SnakeBroadcaster {
 
 	private final ConcurrentHashMap<Integer, Snake> snakes = new ConcurrentHashMap<Integer, Snake>();
 
+	private final LinkedList<Snake> waitqueue = new LinkedList<Snake>();
+
 	private final Broadcaster broadcaster;
 
 	public SnakeBroadcaster(Broadcaster broadcaster) {
 		this.broadcaster = broadcaster;
 	}
 
-	public SnakeBroadcaster broadcast(String message) {
-		broadcaster.broadcast(message);
-		return this;
-	}
-
 	protected synchronized void addSnake(Snake snake) {
 		if (snakes.size() == 0) {
 			startTimer();
 		}
-		snakes.put(Integer.valueOf(snake.getId()), snake);
+		if (snakes.size() >= 2) {
+			logger.info("超额了...");
+			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,您前面还有  %s 条蛇蛇在焦急等待...'}", waitqueue.size()
+					+ ""));
+			waitqueue.add(snake);
+		} else {
+			snakes.put(Integer.valueOf(snake.getId()), snake);
+		}
 	}
 
 	protected Collection<Snake> getSnakes() {
@@ -46,6 +51,7 @@ public class SnakeBroadcaster {
 
 	protected synchronized void removeSnake(Snake snake) {
 		snakes.remove(Integer.valueOf(snake.getId()));
+		waitqueue.remove(snake);
 	}
 
 	protected String tick() {
@@ -59,6 +65,11 @@ public class SnakeBroadcaster {
 			}
 		}
 		return String.format("{'type': 'update', 'data' : [%s]}", sb.toString());
+	}
+
+	public SnakeBroadcaster broadcast(String message) {
+		broadcaster.broadcast(message);
+		return this;
 	}
 
 	public void startTimer() {

@@ -1,68 +1,29 @@
-/*
- * Copyright 2012 Jeanfrancois Arcand
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-/*
- * Copyright 2012 Jeanfrancois Arcand
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package ice.games.snake;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.BroadcasterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SnakeGame {
 
+	private final static Logger logger = LoggerFactory.getLogger(SnakeGame.class);
+
 	protected static final AtomicInteger snakeIds = new AtomicInteger(0);
-	protected static final Random random = new Random();
 	protected final SnakeBroadcaster snakeBroadcaster;
 
 	public SnakeGame() {
 		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true));
 	}
 
-	public static String getRandomHexColor() {
-		float hue = random.nextFloat();
-		// sat between 0.1 and 0.3
-		float saturation = (random.nextInt(2000) + 1000) / 10000f;
-		float luminance = 0.9f;
-		Color color = Color.getHSBColor(hue, saturation, luminance);
-		return '#' + Integer.toHexString((color.getRGB() & 0xffffff) | 0x1000000).substring(1);
-	}
-
 	public void onOpen(AtmosphereResource resource) throws IOException {
 		int id = snakeIds.getAndIncrement();
 		resource.session().setAttribute("id", id);
 		Snake snake = new Snake(id, resource);
-
 		resource.session().setAttribute("snake", snake);
 		snakeBroadcaster.addSnake(snake);
 		StringBuilder sb = new StringBuilder();

@@ -63,8 +63,14 @@ function Snake() {
 }
 
 Snake.prototype.draw = function (context) {
-    for (var id in this.snakeBody) {
-        context.fillStyle = this.color;
+    var isfirst = true;
+	for (var id in this.snakeBody) {
+    	if(isfirst){
+    		isfirst = false;
+	        context.fillStyle = 'red';
+    	}else{
+	        context.fillStyle = this.color;
+    	}
         context.fillRect(this.snakeBody[id].x, this.snakeBody[id].y, Game.gridSize, Game.gridSize);
     }
 };
@@ -138,7 +144,9 @@ Game.draw = function () {
     }
 };
 
+var meid ;
 Game.addSnake = function (id, color) {
+	meid = id;
     Game.entities[id] = new Snake();
     Game.entities[id].color = color;
 };
@@ -194,7 +202,7 @@ Game.connect = (function (host) {
 	};
 
 	request.onReconnect = function(request, response) {
-		Console.log('重连中....');
+		Console.log('重连ok....');
 	};
 	
 	request.onReopen = function(response) {
@@ -234,10 +242,12 @@ Game.connect = (function (host) {
                 break;
             case 'leave':
                 Game.removeSnake(packet.id);
+				Console.log('退出了一条小蛇蛇....'+packet.id);
                 break;
             case 'dead':
                 Console.log('小蛇蛇死了....拜拜...');
                 Game.direction = 'none';
+                Game.removeSnake(meid);
                 break;
             case 'suicide':
                 Console.log('恭喜你,完美的追了自己的尾...^_^');
@@ -245,6 +255,10 @@ Game.connect = (function (host) {
                 break;
             case 'kill':
                 Console.log('你kill了一只可爱的小蛇蛇...');
+                break;
+            case 'wait':
+                Console.log("人满了...........");
+                Console.log(packet.data);
                 break;
         }
     };
@@ -260,7 +274,7 @@ Console.log = (function (message) {
     p.style.wordWrap = 'break-word';
     p.innerHTML = message;
     console.appendChild(p);
-    while (console.childNodes.length > 25) {
+    while (console.childNodes.length > 10) {
         console.removeChild(console.firstChild);
     }
     console.scrollTop = console.scrollHeight;
