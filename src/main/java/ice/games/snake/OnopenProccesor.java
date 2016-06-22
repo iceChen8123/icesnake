@@ -9,12 +9,11 @@ import org.atmosphere.cpr.AtmosphereResource;
 public class OnopenProccesor {
 
 	protected static final AtomicInteger snakeIds = new AtomicInteger(0);
-	protected final SnakeBroadcaster snakeBroadcaster;
+
 	private SnakeManager snakeManager;
 
-	public OnopenProccesor(SnakeBroadcaster snakeBroadcaster, SnakeManager snakeManager) {
+	public OnopenProccesor(SnakeManager snakeManager) {
 		super();
-		this.snakeBroadcaster = snakeBroadcaster;
 		this.snakeManager = snakeManager;
 	}
 
@@ -26,7 +25,7 @@ public class OnopenProccesor {
 
 		sendPlayingSnakeInfoToNew(snake);
 
-		snakeBroadcaster.addSnake(snake);
+		snakeManager.addSnake(snake);
 	}
 
 	private void sendPlayingSnakeInfoToNew(Snake snake) {

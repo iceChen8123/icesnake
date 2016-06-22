@@ -3,14 +3,15 @@ package ice.games.snake;
 import org.atmosphere.cpr.AtmosphereResource;
 
 public class OncloseProccesor {
-	protected final SnakeBroadcaster snakeBroadcaster;
 
-	public OncloseProccesor(SnakeBroadcaster snakeBroadcaster) {
+	private SnakeManager snakeManager;
+
+	public OncloseProccesor(SnakeManager snakeManager) {
 		super();
-		this.snakeBroadcaster = snakeBroadcaster;
+		this.snakeManager = snakeManager;
 	}
 
 	public void onClose(AtmosphereResource resource) {
-		snakeBroadcaster.removeOffLineSnake(resource);
+		snakeManager.removeOffLineSnake(resource);
 	}
 }
