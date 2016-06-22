@@ -10,7 +10,6 @@ import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListenerAdapter;
-import org.atmosphere.cpr.AtmosphereResourceFactory;
 import org.atmosphere.cpr.HeaderConfig;
 
 @ManagedService(path = "/snake")
@@ -50,10 +49,8 @@ public class SnakeManagedService extends SnakeGame {
 	@Post
 	public void onMessage(AtmosphereResource resource) {
 		try {
-			// Here we need to find the suspended AtmosphereResource
-			MessageListener.onMessage(AtmosphereResourceFactory.getDefault().find(resource.uuid()), resource
-					.getRequest().getReader().readLine());
-		} catch (IOException e) {
+			super.onMessage(resource);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

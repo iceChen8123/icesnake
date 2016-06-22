@@ -1,20 +1,14 @@
 package ice.games.snake;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceFactory;
 import org.atmosphere.cpr.BroadcasterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SnakeGame {
 
-	private final static Logger logger = LoggerFactory.getLogger(SnakeGame.class);
-
-	protected static final AtomicInteger snakeIds = new AtomicInteger(0);
-	protected final SnakeBroadcaster snakeBroadcaster;
-
+	private final SnakeBroadcaster snakeBroadcaster;
 	private OnopenProccesor onopenProccesor;
 	private OncloseProccesor oncloseProccesor;
 
@@ -32,8 +26,10 @@ public class SnakeGame {
 		oncloseProccesor.onClose(resource);
 	}
 
-	protected Snake snake(AtmosphereResource resource) {
-		return (Snake) resource.session().getAttribute("snake");
+	public void onMessage(AtmosphereResource resource) throws IOException {
+		// Here we need to find the suspended AtmosphereResource
+		MessageListener.onMessage(AtmosphereResourceFactory.getDefault().find(resource.uuid()), resource.getRequest()
+				.getReader().readLine());
 	}
 
 }
