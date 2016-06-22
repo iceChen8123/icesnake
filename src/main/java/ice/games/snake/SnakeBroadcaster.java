@@ -36,10 +36,6 @@ public class SnakeBroadcaster {
 	}
 
 	synchronized void addSnake(Snake snake) {
-		if (isFirst) {
-			isFirst = false; // 只有添加过蛇，才开始，因为会初始化两个广播类，这样就能少一个空跑的线程
-			startTimer();
-		}
 		snakeManager.waitForPlay(snake);
 		if (snakeManager.playingSnakesNum() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
@@ -85,13 +81,18 @@ public class SnakeBroadcaster {
 		snakeManager.removePlayingSnake(snake.getId());
 		snakeManager.removeWaitSnake(snake);
 
-		broadcast(String.format("{'type': 'leave', 'id': %d}", ((Integer) resource.session().getAttribute("id"))));
+		Integer snakeId = (Integer) resource.session().getAttribute("id");
+		broadcast(String.format("{'type': 'leave', 'id': %d}", snakeId));
 	}
 
 	private ReentrantLock broadcastLock = new ReentrantLock();
 
-	void broadcast(String message) {
+	private void broadcast(String message) {
 		broadcastLock.lock();
+		if (isFirst) {
+			isFirst = false; // 只有广播过，才开始，因为会初始化两个广播类，这样就能少一个空跑的线程
+			startTimer();
+		}
 		try {
 			Future<Object> broadcast = broadcaster.broadcast(message);
 			broadcast.get();
