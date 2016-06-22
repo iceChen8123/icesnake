@@ -28,7 +28,7 @@ public class SnakeBroadcaster {
 
 	private final long TICK_DELAY = 100;
 
-	private final ConcurrentHashMap<Integer, Snake> snakes = new ConcurrentHashMap<Integer, Snake>();
+	private final ConcurrentHashMap<Integer, Snake> playingSnakes = new ConcurrentHashMap<Integer, Snake>();
 
 	private final LinkedList<Snake> waitqueue = new LinkedList<Snake>();
 
@@ -45,19 +45,19 @@ public class SnakeBroadcaster {
 			isFirst = false; // 只有添加过蛇，才开始，因为会初始化两个广播类，这样就能少一个空跑的线程
 			startTimer();
 		}
-		waitqueue.add(snake);
-		if (snakes.size() >= MAX_ALIVE_SNAKE) {
+		waitForPlay(snake);
+		if (playingSnakesNum() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
-					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
+					waitSnakesNum() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
 		} else {
 			activeWaitSnake();
 		}
 	}
 
 	private synchronized void removeDeadSnake(Snake snake) {
-		snakes.remove(snake.getId());
-		logger.info("{} 死了...,目前为: {}", snake.getId(), snakes.toString());
-		broadcast(String.format("{'type': 'dead', 'id': %d}", snake.getId()));
+		int snakeId = snake.getId();
+		removePlayingSnake(snakeId);
+		broadcast(String.format("{'type': 'dead', 'id': %d}", snakeId));
 		addSnake(snake);
 		activeWaitSnake();
 	}
@@ -76,10 +76,10 @@ public class SnakeBroadcaster {
 	}
 
 	private void activeWaitSnake() {
-		if (waitqueue.size() > 0) {
-			Snake firstWait = waitqueue.removeFirst();
+		if (waitSnakesNum() > 0) {
+			Snake firstWait = getFirstWaitSnake();
 			firstWait.startPlay();
-			snakes.put(Integer.valueOf(firstWait.getId()), firstWait);
+			addNewPlayingSnake(firstWait);
 			broadcastPlayingSnakeInfo();
 		}
 	}
@@ -87,14 +87,42 @@ public class SnakeBroadcaster {
 	synchronized void removeOffLineSnake(AtmosphereResource resource) {
 		broadcaster.removeAtmosphereResource(resource);
 		Snake snake = (Snake) resource.session().getAttribute("snake");
-		snakes.remove(Integer.valueOf(snake.getId()));
-		waitqueue.remove(snake);
+		removePlayingSnake(snake.getId());
+		removeWaitSnake(snake);
 
 		broadcast(String.format("{'type': 'leave', 'id': %d}", ((Integer) resource.session().getAttribute("id"))));
 	}
 
+	private int waitSnakesNum() {
+		return waitqueue.size();
+	}
+
+	private void waitForPlay(Snake snake) {
+		waitqueue.add(snake);
+	}
+
+	private Snake getFirstWaitSnake() {
+		return waitqueue.removeFirst();
+	}
+
+	private boolean removeWaitSnake(Snake snake) {
+		return waitqueue.remove(snake);
+	}
+
+	private void addNewPlayingSnake(Snake firstWait) {
+		playingSnakes.put(Integer.valueOf(firstWait.getId()), firstWait);
+	}
+
+	private int playingSnakesNum() {
+		return playingSnakes.size();
+	}
+
+	private void removePlayingSnake(int snakeId) {
+		playingSnakes.remove(snakeId);
+	}
+
 	Collection<Snake> getPlayingSnakes() {
-		return Collections.unmodifiableCollection(snakes.values());
+		return Collections.unmodifiableCollection(playingSnakes.values());
 	}
 
 	private ReentrantLock broadcastLock = new ReentrantLock();
