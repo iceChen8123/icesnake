@@ -35,11 +35,73 @@ public class Snake {
 		this.status = SnakeStatus.wait;
 	}
 
-	private void resetState() {
-		this.direction = Direction.NONE;
-		this.head = getRandomLocation();
-		this.tail.clear();
-		this.length = Settings.DEFAULT_SNAKE_LENGTH;
+	public int getId() {
+		return id;
+	}
+
+	public String getHexColor() {
+		return hexColor;
+	}
+
+	public SnakeStatus getStatus() {
+		return status;
+	}
+
+	public synchronized Location getHead() {
+		return head;
+	}
+
+	public synchronized Collection<Location> getTail() {
+		return tail;
+	}
+
+	protected synchronized void setDirection(Direction direction) {
+		if (status != SnakeStatus.wait) {
+			this.direction = direction;
+		}
+	}
+
+	protected synchronized String getLocationsJson() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(head.x), Integer.valueOf(head.y)));
+		for (Location location : tail) {
+			sb.append(',');
+			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x), Integer.valueOf(location.y)));
+		}
+		return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(id), sb.toString());
+	}
+
+	protected void startPlay() {
+		status = SnakeStatus.start;
+	}
+
+	protected void sendMessage(String msg) {
+		resource.getResponse().write(msg);
+	}
+
+	protected synchronized void update(Collection<Snake> snakes) {
+		Location nextLocation = head.getAdjacentLocation(direction);
+		if (nextLocation.x >= Settings.PLAYFIELD_WIDTH) {
+			nextLocation.x = 0;
+		}
+		if (nextLocation.y >= Settings.PLAYFIELD_HEIGHT) {
+			nextLocation.y = 0;
+		}
+		if (nextLocation.x < 0) {
+			nextLocation.x = Settings.PLAYFIELD_WIDTH;
+		}
+		if (nextLocation.y < 0) {
+			nextLocation.y = Settings.PLAYFIELD_HEIGHT;
+		}
+		if (direction != Direction.NONE) {
+			tail.addFirst(head);
+			if (tail.size() > length) {
+				tail.removeLast();
+			}
+			head = nextLocation;
+		}
+
+		handleCollisions(snakes);
 	}
 
 	private static String getRandomHexColor() {
@@ -49,6 +111,13 @@ public class Snake {
 		float luminance = 0.9f;
 		Color color = Color.getHSBColor(hue, saturation, luminance);
 		return '#' + Integer.toHexString((color.getRGB() & 0xffffff) | 0x1000000).substring(1);
+	}
+
+	private void resetState() {
+		this.direction = Direction.NONE;
+		this.head = getRandomLocation();
+		this.tail.clear();
+		this.length = Settings.DEFAULT_SNAKE_LENGTH;
 	}
 
 	private static Location getRandomLocation() {
@@ -81,35 +150,6 @@ public class Snake {
 		sendMessage(Settings.MESSAGE_KILL);
 	}
 
-	protected void sendMessage(String msg) {
-		resource.getResponse().write(msg);
-	}
-
-	public synchronized void update(Collection<Snake> snakes) {
-		Location nextLocation = head.getAdjacentLocation(direction);
-		if (nextLocation.x >= Settings.PLAYFIELD_WIDTH) {
-			nextLocation.x = 0;
-		}
-		if (nextLocation.y >= Settings.PLAYFIELD_HEIGHT) {
-			nextLocation.y = 0;
-		}
-		if (nextLocation.x < 0) {
-			nextLocation.x = Settings.PLAYFIELD_WIDTH;
-		}
-		if (nextLocation.y < 0) {
-			nextLocation.y = Settings.PLAYFIELD_HEIGHT;
-		}
-		if (direction != Direction.NONE) {
-			tail.addFirst(head);
-			if (tail.size() > length) {
-				tail.removeLast();
-			}
-			head = nextLocation;
-		}
-
-		handleCollisions(snakes);
-	}
-
 	private void handleCollisions(Collection<Snake> snakes) {
 		for (Snake snake : snakes) {
 			if (id != snake.id) {
@@ -126,44 +166,6 @@ public class Snake {
 				}
 			}
 		}
-	}
-
-	public synchronized Location getHead() {
-		return head;
-	}
-
-	public synchronized Collection<Location> getTail() {
-		return tail;
-	}
-
-	public synchronized void setDirection(Direction direction) {
-		this.direction = direction;
-	}
-
-	public synchronized String getLocationsJson() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(head.x), Integer.valueOf(head.y)));
-		for (Location location : tail) {
-			sb.append(',');
-			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x), Integer.valueOf(location.y)));
-		}
-		return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(id), sb.toString());
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getHexColor() {
-		return hexColor;
-	}
-
-	public SnakeStatus getStatus() {
-		return status;
-	}
-
-	public void startPlay() {
-		status = SnakeStatus.start;
 	}
 
 }
