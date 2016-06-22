@@ -3,11 +3,8 @@ package ice.games.snake;
 import ice.games.snake.Snake.SnakeStatus;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -28,16 +25,15 @@ public class SnakeBroadcaster {
 
 	private final long TICK_DELAY = 100;
 
-	private final ConcurrentHashMap<Integer, Snake> playingSnakes = new ConcurrentHashMap<Integer, Snake>();
-
-	private final LinkedList<Snake> waitqueue = new LinkedList<Snake>();
-
 	private final Broadcaster broadcaster;
 
 	private boolean isFirst = true;
 
+	private SnakeManager snakeManager;
+
 	public SnakeBroadcaster(Broadcaster broadcaster) {
 		this.broadcaster = broadcaster;
+		this.snakeManager = new SnakeManager();
 	}
 
 	synchronized void addSnake(Snake snake) {
@@ -45,10 +41,10 @@ public class SnakeBroadcaster {
 			isFirst = false; // 只有添加过蛇，才开始，因为会初始化两个广播类，这样就能少一个空跑的线程
 			startTimer();
 		}
-		waitForPlay(snake);
-		if (playingSnakesNum() >= MAX_ALIVE_SNAKE) {
+		snakeManager.waitForPlay(snake);
+		if (snakeManager.playingSnakesNum() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
-					waitSnakesNum() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
+					snakeManager.waitSnakesNum() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
 		} else {
 			activeWaitSnake();
 		}
@@ -56,7 +52,7 @@ public class SnakeBroadcaster {
 
 	private synchronized void removeDeadSnake(Snake snake) {
 		int snakeId = snake.getId();
-		removePlayingSnake(snakeId);
+		snakeManager.removePlayingSnake(snakeId);
 		broadcast(String.format("{'type': 'dead', 'id': %d}", snakeId));
 		addSnake(snake);
 		activeWaitSnake();
@@ -76,10 +72,10 @@ public class SnakeBroadcaster {
 	}
 
 	private void activeWaitSnake() {
-		if (waitSnakesNum() > 0) {
-			Snake firstWait = getFirstWaitSnake();
+		if (snakeManager.waitSnakesNum() > 0) {
+			Snake firstWait = snakeManager.getFirstWaitSnake();
 			firstWait.startPlay();
-			addNewPlayingSnake(firstWait);
+			snakeManager.addNewPlayingSnake(firstWait);
 			broadcastPlayingSnakeInfo();
 		}
 	}
@@ -87,42 +83,14 @@ public class SnakeBroadcaster {
 	synchronized void removeOffLineSnake(AtmosphereResource resource) {
 		broadcaster.removeAtmosphereResource(resource);
 		Snake snake = (Snake) resource.session().getAttribute("snake");
-		removePlayingSnake(snake.getId());
-		removeWaitSnake(snake);
+		snakeManager.removePlayingSnake(snake.getId());
+		snakeManager.removeWaitSnake(snake);
 
 		broadcast(String.format("{'type': 'leave', 'id': %d}", ((Integer) resource.session().getAttribute("id"))));
 	}
 
-	private int waitSnakesNum() {
-		return waitqueue.size();
-	}
-
-	private void waitForPlay(Snake snake) {
-		waitqueue.add(snake);
-	}
-
-	private Snake getFirstWaitSnake() {
-		return waitqueue.removeFirst();
-	}
-
-	private boolean removeWaitSnake(Snake snake) {
-		return waitqueue.remove(snake);
-	}
-
-	private void addNewPlayingSnake(Snake firstWait) {
-		playingSnakes.put(Integer.valueOf(firstWait.getId()), firstWait);
-	}
-
-	private int playingSnakesNum() {
-		return playingSnakes.size();
-	}
-
-	private void removePlayingSnake(int snakeId) {
-		playingSnakes.remove(snakeId);
-	}
-
 	Collection<Snake> getPlayingSnakes() {
-		return Collections.unmodifiableCollection(playingSnakes.values());
+		return snakeManager.getPlayingSnakes();
 	}
 
 	private ReentrantLock broadcastLock = new ReentrantLock();
