@@ -34,10 +34,21 @@ public class SnakeManager implements Callable<String> {
 		return Collections.unmodifiableCollection(playingSnakes.values());
 	}
 
-	synchronized void addNewSnake(Snake snake) {
+	synchronized void addNewPlaySnake(Snake snake) {
 		sendPlayingSnakeInfoToNew(snake);
 		waitqueue.add(snake);
-		logger.info("蛇 {} 等待开始...", snake.getId());
+		logger.info("蛇 {} 进入游戏,等待开始...", snake.getId());
+		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
+			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
+					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
+		} else {
+			activeWaitSnake();
+		}
+	}
+
+	private synchronized void rePlaySnake(Snake snake) {
+		waitqueue.add(snake);
+		logger.info("蛇 {} 重新进入等待...", snake.getId());
 		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
 					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
@@ -52,7 +63,6 @@ public class SnakeManager implements Callable<String> {
 		logger.info("蛇 {} 死了,移出游戏队列...", snakeId);
 		snakeBroadcaster.broadcast(String.format("{'type': 'dead', 'id': %d}", snakeId));
 		rePlaySnake(snake);
-		activeWaitSnake();
 	}
 
 	void removeOffLineSnake(AtmosphereResource resource) {
@@ -64,17 +74,6 @@ public class SnakeManager implements Callable<String> {
 
 		Integer snakeId = (Integer) resource.session().getAttribute("id");
 		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", snakeId));
-	}
-
-	private synchronized void rePlaySnake(Snake snake) {
-		waitqueue.add(snake);
-		logger.info("蛇 {} 重新进入等待...", snake.getId());
-		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
-			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
-					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
-		} else {
-			activeWaitSnake();
-		}
 	}
 
 	private void sendPlayingSnakeInfoToNew(Snake snake) {
