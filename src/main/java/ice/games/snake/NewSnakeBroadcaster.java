@@ -1,9 +1,5 @@
 package ice.games.snake;
 
-import ice.games.snake.Snake.SnakeStatus;
-
-import java.util.Iterator;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -53,35 +49,7 @@ public class NewSnakeBroadcaster {
 	}
 
 	private void startTimer() {
-		broadcaster.scheduleFixedBroadcast(new Callable<String>() {
-			@Override
-			public String call() {
-				try {
-					return tick();
-				} catch (RuntimeException e) {
-					logger.error("Caught to prevent timer from shutting down", e);
-				}
-				return "";
-			}
-
-			private String tick() {
-				StringBuilder sb = new StringBuilder();
-				for (Iterator<Snake> iterator = snakeManager.getPlayingSnakes().iterator(); iterator.hasNext();) {
-					Snake snake = iterator.next();
-					snake.update(snakeManager.getPlayingSnakes()); // TODO
-																	// 这边需要注意下，在一个tick内，是否要多次获取所有蛇???
-					if (snake.getStatus() == SnakeStatus.dead) {
-						snakeManager.removeDeadSnake(snake);
-					} else {
-						sb.append(snake.getLocationsJson());
-						if (iterator.hasNext()) {
-							sb.append(',');
-						}
-					}
-				}
-				return String.format("{'type': 'update', 'data' : [%s]}", sb.toString());
-			}
-		}, TICK_DELAY, TICK_DELAY, TimeUnit.MILLISECONDS);
+		broadcaster.scheduleFixedBroadcast(snakeManager, TICK_DELAY, TICK_DELAY, TimeUnit.MILLISECONDS);
 	}
 
 }

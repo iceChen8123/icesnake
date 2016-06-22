@@ -1,9 +1,12 @@
 package ice.games.snake;
 
+import ice.games.snake.Snake.SnakeStatus;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.atmosphere.cpr.AtmosphereResource;
@@ -11,7 +14,7 @@ import org.atmosphere.cpr.BroadcasterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SnakeManager {
+public class SnakeManager implements Callable<String> {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -110,4 +113,29 @@ public class SnakeManager {
 		}
 		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
 	}
+
+	@Override
+	public String call() {
+		try {
+			StringBuilder sb = new StringBuilder();
+			for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
+				Snake snake = iterator.next();
+				snake.update(getPlayingSnakes()); // TODO
+													// 这边需要注意下，在一个tick内，是否要多次获取所有蛇???
+				if (snake.getStatus() == SnakeStatus.dead) {
+					removeDeadSnake(snake);
+				} else {
+					sb.append(snake.getLocationsJson());
+					if (iterator.hasNext()) {
+						sb.append(',');
+					}
+				}
+			}
+			return String.format("{'type': 'update', 'data' : [%s]}", sb.toString());
+		} catch (RuntimeException e) {
+			logger.error("Caught to prevent timer from shutting down", e);
+		}
+		return "";
+	}
+
 }
