@@ -34,12 +34,17 @@ public class SnakeBroadcaster {
 
 	private final Broadcaster broadcaster;
 
+	private boolean isFirst = true;
+
 	public SnakeBroadcaster(Broadcaster broadcaster) {
 		this.broadcaster = broadcaster;
-		startTimer();
 	}
 
 	synchronized void addSnake(Snake snake) {
+		if (isFirst) {
+			isFirst = false; // 只有添加过蛇，才开始，因为会初始化两个广播类，这样就能少一个空跑的线程
+			startTimer();
+		}
 		waitqueue.add(snake);
 		if (snakes.size() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
