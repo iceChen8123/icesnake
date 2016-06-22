@@ -11,10 +11,12 @@ public class SnakeGame {
 	private final SnakeBroadcaster snakeBroadcaster;
 	private OnopenProccesor onopenProccesor;
 	private OncloseProccesor oncloseProccesor;
+	private SnakeManager snakeManager;
 
 	public SnakeGame() {
-		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true));
-		this.onopenProccesor = new OnopenProccesor(snakeBroadcaster);
+		this.snakeManager = new SnakeManager();
+		snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), snakeManager);
+		this.onopenProccesor = new OnopenProccesor(snakeBroadcaster, snakeManager);
 		this.oncloseProccesor = new OncloseProccesor(snakeBroadcaster);
 	}
 

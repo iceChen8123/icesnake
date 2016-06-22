@@ -2,7 +2,6 @@ package ice.games.snake;
 
 import ice.games.snake.Snake.SnakeStatus;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -31,9 +30,9 @@ public class SnakeBroadcaster {
 
 	private SnakeManager snakeManager;
 
-	public SnakeBroadcaster(Broadcaster broadcaster) {
+	public SnakeBroadcaster(Broadcaster broadcaster, SnakeManager snakeManager) {
 		this.broadcaster = broadcaster;
-		this.snakeManager = new SnakeManager();
+		this.snakeManager = snakeManager;
 	}
 
 	synchronized void addSnake(Snake snake) {
@@ -61,7 +60,7 @@ public class SnakeBroadcaster {
 	private void broadcastPlayingSnakeInfo() {
 		Snake snake;
 		StringBuilder sb = new StringBuilder();
-		for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
+		for (Iterator<Snake> iterator = snakeManager.getPlayingSnakes().iterator(); iterator.hasNext();) {
 			snake = iterator.next();
 			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
 			if (iterator.hasNext()) {
@@ -87,10 +86,6 @@ public class SnakeBroadcaster {
 		snakeManager.removeWaitSnake(snake);
 
 		broadcast(String.format("{'type': 'leave', 'id': %d}", ((Integer) resource.session().getAttribute("id"))));
-	}
-
-	Collection<Snake> getPlayingSnakes() {
-		return snakeManager.getPlayingSnakes();
 	}
 
 	private ReentrantLock broadcastLock = new ReentrantLock();
@@ -121,9 +116,10 @@ public class SnakeBroadcaster {
 
 			private String tick() {
 				StringBuilder sb = new StringBuilder();
-				for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
+				for (Iterator<Snake> iterator = snakeManager.getPlayingSnakes().iterator(); iterator.hasNext();) {
 					Snake snake = iterator.next();
-					snake.update(getPlayingSnakes());
+					snake.update(snakeManager.getPlayingSnakes()); // TODO
+																	// 这边需要注意下，在一个tick内，是否要多次获取所有蛇???
 					if (snake.getStatus() == SnakeStatus.dead) {
 						removeDeadSnake(snake);
 					} else {

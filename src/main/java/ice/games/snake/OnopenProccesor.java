@@ -10,10 +10,12 @@ public class OnopenProccesor {
 
 	protected static final AtomicInteger snakeIds = new AtomicInteger(0);
 	protected final SnakeBroadcaster snakeBroadcaster;
+	private SnakeManager snakeManager;
 
-	public OnopenProccesor(SnakeBroadcaster snakeBroadcaster) {
+	public OnopenProccesor(SnakeBroadcaster snakeBroadcaster, SnakeManager snakeManager) {
 		super();
 		this.snakeBroadcaster = snakeBroadcaster;
+		this.snakeManager = snakeManager;
 	}
 
 	public void onOpen(AtmosphereResource resource) throws IOException {
@@ -30,7 +32,7 @@ public class OnopenProccesor {
 	private void sendPlayingSnakeInfoToNew(Snake snake) {
 		Snake snaketemp;
 		StringBuilder sb = new StringBuilder();
-		for (Iterator<Snake> iterator = snakeBroadcaster.getPlayingSnakes().iterator(); iterator.hasNext();) {
+		for (Iterator<Snake> iterator = snakeManager.getPlayingSnakes().iterator(); iterator.hasNext();) {
 			snaketemp = iterator.next();
 			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snaketemp.getId()),
 					snaketemp.getHexColor()));
