@@ -31,32 +31,10 @@ public class SnakeManager {
 		return Collections.unmodifiableCollection(playingSnakes.values());
 	}
 
-	void removeOffLineSnake(AtmosphereResource resource) {
-		snakeBroadcaster.removeAtmosphereResource(resource);
-		Snake snake = (Snake) resource.session().getAttribute("snake");
-		playingSnakes.remove(snake.getId());
-		logger.info("蛇 {} 退出游戏...", snake.getId());
-		waitqueue.remove(snake);// TODO 当等待的人多了以后，这里可能会出问题
-
-		Integer snakeId = (Integer) resource.session().getAttribute("id");
-		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", snakeId));
-	}
-
-	synchronized void addSnake(Snake snake) {
+	synchronized void addNewSnake(Snake snake) {
 		sendPlayingSnakeInfoToNew(snake);
 		waitqueue.add(snake);
 		logger.info("蛇 {} 等待开始...", snake.getId());
-		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
-			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
-					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
-		} else {
-			activeWaitSnake();
-		}
-	}
-
-	synchronized void reAddSnake(Snake snake) {
-		waitqueue.add(snake);
-		logger.info("蛇 {} 重新进入等待...", snake.getId());
 		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
 					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
@@ -70,8 +48,30 @@ public class SnakeManager {
 		playingSnakes.remove(snakeId);
 		logger.info("蛇 {} 死了,移出游戏队列...", snakeId);
 		snakeBroadcaster.broadcast(String.format("{'type': 'dead', 'id': %d}", snakeId));
-		reAddSnake(snake);
+		rePlaySnake(snake);
 		activeWaitSnake();
+	}
+
+	void removeOffLineSnake(AtmosphereResource resource) {
+		snakeBroadcaster.removeOffLineSnake(resource);
+		Snake snake = (Snake) resource.session().getAttribute("snake");
+		playingSnakes.remove(snake.getId());
+		logger.info("蛇 {} 退出游戏...", snake.getId());
+		waitqueue.remove(snake);// TODO 当等待的人多了以后，这里可能会出问题
+
+		Integer snakeId = (Integer) resource.session().getAttribute("id");
+		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", snakeId));
+	}
+
+	private synchronized void rePlaySnake(Snake snake) {
+		waitqueue.add(snake);
+		logger.info("蛇 {} 重新进入等待...", snake.getId());
+		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
+			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
+					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
+		} else {
+			activeWaitSnake();
+		}
 	}
 
 	private void sendPlayingSnakeInfoToNew(Snake snake) {

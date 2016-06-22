@@ -32,6 +32,10 @@ public class NewSnakeBroadcaster {
 
 	private ReentrantLock broadcastLock = new ReentrantLock();
 
+	void removeOffLineSnake(AtmosphereResource resource) {
+		broadcaster.removeAtmosphereResource(resource);
+	}
+
 	void broadcast(String message) {
 		broadcastLock.lock();
 		if (isFirst) {
@@ -80,7 +84,4 @@ public class NewSnakeBroadcaster {
 		}, TICK_DELAY, TICK_DELAY, TimeUnit.MILLISECONDS);
 	}
 
-	public void removeAtmosphereResource(AtmosphereResource resource) {
-		broadcaster.removeAtmosphereResource(resource);
-	}
 }

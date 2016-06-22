@@ -22,7 +22,7 @@ public class OnopenProccesor {
 		Snake snake = new Snake(id, resource);
 		resource.session().setAttribute("snake", snake);
 
-		snakeManager.addSnake(snake);
+		snakeManager.addNewSnake(snake);
 	}
 
 }
