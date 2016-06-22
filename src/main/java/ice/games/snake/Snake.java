@@ -47,14 +47,6 @@ public class Snake {
 		return status;
 	}
 
-	public synchronized Location getHead() {
-		return head;
-	}
-
-	public synchronized Collection<Location> getTail() {
-		return tail;
-	}
-
 	protected synchronized void setDirection(Direction direction) {
 		if (status != SnakeStatus.wait) {
 			this.direction = direction;
@@ -102,6 +94,14 @@ public class Snake {
 		}
 
 		handleCollisions(snakes);
+	}
+
+	private synchronized Location getHead() {
+		return head;
+	}
+
+	private synchronized Collection<Location> getTail() {
+		return tail;
 	}
 
 	private static String getRandomHexColor() {
