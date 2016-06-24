@@ -127,7 +127,7 @@ var directioninfo = {'up':'上','down':'下','left':'左','right':'右'}
 Game.setDirection = function (direction) {
     Game.direction = direction;
     Game.socket.push(direction);
-    Console.log('方向 ' + directioninfo[direction]);
+    // Console.log('方向 ' + directioninfo[direction]);
 };
 
 Game.startGameLoop = function () {
