@@ -1,7 +1,7 @@
 package ice.games.snake;
 
 import ice.games.snake.Snake.SnakeStatus;
-import ice.games.snake.base.NewSnakeBroadcaster;
+import ice.games.snake.base.SnakeBroadcaster;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,14 +27,14 @@ public class SnakeManager implements Callable<String> {
 
 	private final int MAX_ALIVE_SNAKE = 2;
 
-	private NewSnakeBroadcaster snakeBroadcaster;
+	private SnakeBroadcaster snakeBroadcaster;
 
 	private Snake boss;
 
 	private List<Snake> partnerList = new ArrayList<Snake>();
 
 	public SnakeManager() {
-		this.snakeBroadcaster = new NewSnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
+		this.snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
 	}
 
 	public synchronized void addNewPlaySnake(Snake snake) {

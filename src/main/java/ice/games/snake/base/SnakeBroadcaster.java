@@ -11,7 +11,7 @@ import org.atmosphere.cpr.Broadcaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NewSnakeBroadcaster {
+public class SnakeBroadcaster {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -23,7 +23,7 @@ public class NewSnakeBroadcaster {
 
 	private boolean isFirst = true;
 
-	public NewSnakeBroadcaster(Broadcaster broadcaster, SnakeManager snakeManager) {
+	public SnakeBroadcaster(Broadcaster broadcaster, SnakeManager snakeManager) {
 		this.broadcaster = broadcaster;
 		this.snakeManager = snakeManager;
 	}
