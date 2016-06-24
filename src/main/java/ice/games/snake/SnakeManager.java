@@ -2,10 +2,12 @@ package ice.games.snake;
 
 import ice.games.snake.Snake.SnakeStatus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,15 +28,18 @@ public class SnakeManager implements Callable<String> {
 
 	private NewSnakeBroadcaster snakeBroadcaster;
 
+	private Snake boss;
+
+	private List<Snake> partnerList = new ArrayList<Snake>();
+
 	public SnakeManager() {
 		this.snakeBroadcaster = new NewSnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
 	}
 
 	synchronized void addNewPlaySnake(Snake snake) {
-		sendPlayingSnakeInfoToNew(snake);
+		snake.sendMessage(getPlayingSnakeInfo());
 		waitqueue.add(snake);
-		logger.info("蛇 {} 进入游戏,等待开始...", snake.getId());
-		snake.sendMessage(String.format("{'type': 'info', 'data' : '%s'}", snake.getId()));
+		logger.info("蛇 {} 进入游戏,开始等待...", snake.getId());
 		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
 					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
@@ -50,6 +55,8 @@ public class SnakeManager implements Callable<String> {
 		logger.info("蛇 {} 退出游戏...", snake.getId());
 		waitqueue.remove(snake);// TODO 当等待的人多了以后，这里可能会出问题
 
+		takeoffRole(snake);
+
 		Integer snakeId = (Integer) resource.session().getAttribute("id");
 		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", snakeId));
 	}
@@ -58,22 +65,16 @@ public class SnakeManager implements Callable<String> {
 		return Collections.unmodifiableCollection(playingSnakes.values());
 	}
 
-	private void sendPlayingSnakeInfoToNew(Snake snake) {
-		snake.sendMessage(getPlayingSnakeInfo());
-	}
-
 	private void activeWaitSnake() {
 		if (waitqueue.size() > 0) {
 			Snake firstWait = waitqueue.removeFirst();
 			firstWait.startPlay();
+			firstWait.sendMessage(String.format("{'type': 'info', 'data' : '%s'}", firstWait.getId()));
+			setRole(firstWait);
 			playingSnakes.put(Integer.valueOf(firstWait.getId()), firstWait);
 			logger.info("蛇 {} 开始游戏...", firstWait.getId());
-			broadcastPlayingSnakeInfo();
+			snakeBroadcaster.broadcast(getPlayingSnakeInfo());
 		}
-	}
-
-	private void broadcastPlayingSnakeInfo() {
-		snakeBroadcaster.broadcast(getPlayingSnakeInfo());
 	}
 
 	private String getPlayingSnakeInfo() {
@@ -116,9 +117,27 @@ public class SnakeManager implements Callable<String> {
 	private synchronized void removeDeadSnake(Snake snake) {
 		int snakeId = snake.getId();
 		playingSnakes.remove(snakeId);
+		takeoffRole(snake);
 		logger.info("蛇 {} 死了,移出游戏队列...", snakeId);
 		snakeBroadcaster.broadcast(String.format("{'type': 'dead', 'id': %d}", snakeId));
 		rePlaySnake(snake);
+	}
+
+	private void setRole(Snake firstWait) {
+		if (boss == null) {
+			firstWait.setHeadcolor("white");
+			boss = firstWait;
+		} else {
+			partnerList.add(firstWait);
+		}
+	}
+
+	private void takeoffRole(Snake snake) {
+		if (boss == snake) {
+			boss = null;
+		} else {
+			partnerList.remove(snake);
+		}
 	}
 
 	private synchronized void rePlaySnake(Snake snake) {

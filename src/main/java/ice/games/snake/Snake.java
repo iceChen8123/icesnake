@@ -24,7 +24,7 @@ public class Snake {
 	private Direction direction;
 	private Location head;
 	private final String hexColor;
-	private final String headColor;
+	private String headColor;
 
 	private final AtmosphereResource resource;
 
@@ -177,6 +177,10 @@ public class Snake {
 
 	public String getHeadColor() {
 		return headColor;
+	}
+
+	public void setHeadcolor(String string) {
+		headColor = string;
 	}
 
 }
