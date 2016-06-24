@@ -24,7 +24,7 @@ public class SnakeManager implements Callable<String> {
 
 	private final LinkedList<Snake> waitqueue = new LinkedList<Snake>();
 
-	private static final int MAX_ALIVE_SNAKE = 2;
+	private final int MAX_ALIVE_SNAKE = 2;
 
 	private NewSnakeBroadcaster snakeBroadcaster;
 
@@ -40,12 +40,7 @@ public class SnakeManager implements Callable<String> {
 		snake.sendMessage(getPlayingSnakeInfo());
 		waitqueue.add(snake);
 		logger.info("蛇 {} 进入游戏,开始等待...", snake.getId());
-		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
-			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
-					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
-		} else {
-			activeWaitSnake();
-		}
+		afterJoinWaitQueue(snake);
 	}
 
 	void removeOffLineSnake(AtmosphereResource resource) {
@@ -143,6 +138,10 @@ public class SnakeManager implements Callable<String> {
 	private synchronized void rePlaySnake(Snake snake) {
 		waitqueue.add(snake);
 		logger.info("蛇 {} 重新进入等待...", snake.getId());
+		afterJoinWaitQueue(snake);
+	}
+
+	private void afterJoinWaitQueue(Snake snake) {
 		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
 					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
