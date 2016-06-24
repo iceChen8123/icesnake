@@ -1,6 +1,5 @@
 package ice.games.snake;
 
-import ice.games.snake.Snake.SnakeStatus;
 import ice.games.snake.base.SnakeBroadcaster;
 
 import java.util.ArrayList;
@@ -94,7 +93,7 @@ public class SnakeManager implements Callable<String> {
 				Snake snake = iterator.next();
 				snake.update(getPlayingSnakes()); // TODO
 													// 这边需要注意下，在一个tick内，是否要多次获取所有蛇???
-				if (snake.getStatus() == SnakeStatus.dead) {
+				if (snake.isDead()) {
 					removeDeadSnake(snake);
 				} else {
 					sb.append(snake.getLocationsJson());
@@ -121,7 +120,7 @@ public class SnakeManager implements Callable<String> {
 
 	private void setRole(Snake firstWait) {
 		if (boss == null) {
-			firstWait.setHeadcolor("white");
+			firstWait.setBoss();
 			boss = firstWait;
 		} else {
 			partnerList.add(firstWait);

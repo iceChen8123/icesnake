@@ -49,8 +49,16 @@ public class Snake {
 		return hexColor;
 	}
 
-	public SnakeStatus getStatus() {
-		return status;
+	public String getHeadColor() {
+		return headColor;
+	}
+
+	public void setBoss() {
+		headColor = "white";
+	}
+
+	public boolean isDead() {
+		return status == SnakeStatus.dead;
 	}
 
 	public synchronized void setDirection(Direction direction) {
@@ -177,14 +185,6 @@ public class Snake {
 				}
 			}
 		}
-	}
-
-	public String getHeadColor() {
-		return headColor;
-	}
-
-	public void setHeadcolor(String string) {
-		headColor = string;
 	}
 
 }
