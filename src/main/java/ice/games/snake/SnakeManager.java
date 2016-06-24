@@ -24,7 +24,7 @@ public class SnakeManager implements Callable<String> {
 
 	private final LinkedList<Snake> waitqueue = new LinkedList<Snake>();
 
-	private final int MAX_ALIVE_SNAKE = 2;
+	private final int MAX_ALIVE_SNAKE = 10;
 
 	private SnakeBroadcaster snakeBroadcaster;
 
