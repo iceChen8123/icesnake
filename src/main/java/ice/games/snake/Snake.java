@@ -22,19 +22,19 @@ public class Snake {
 	private static final Random randomForColor = new Random();
 
 	private final int id;
+	private SnakeStatus status;
+	private String headColor;
+	private final String bodyColor;
+	private Location head;
+	private Direction direction;
 	private int length = Settings.DEFAULT_SNAKE_LENGTH;
 	private final Deque<Location> tail = new ArrayDeque<Location>();
-	private SnakeStatus status;
-	private Direction direction;
-	private Location head;
-	private final String hexColor;
-	private String headColor;
 
 	private final AtmosphereResource resource;
 
 	public Snake(int id, AtmosphereResource resource) {
 		this.id = id;
-		this.hexColor = getRandomHexColor();
+		this.bodyColor = getRandomHexColor();
 		this.headColor = genHeadColor();
 		this.resource = resource;
 		resetState();
@@ -51,8 +51,8 @@ public class Snake {
 		return id;
 	}
 
-	String getHexColor() {
-		return hexColor;
+	String getBodyColor() {
+		return bodyColor;
 	}
 
 	String getHeadColor() {

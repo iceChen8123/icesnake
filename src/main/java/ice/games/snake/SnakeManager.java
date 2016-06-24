@@ -77,7 +77,7 @@ public class SnakeManager implements Callable<String> {
 		for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
 			Snake snaketemp = iterator.next();
 			sb.append(String.format("{id: %d, color: '%s', headcolor: '%s'}", Integer.valueOf(snaketemp.getId()),
-					snaketemp.getHexColor(), snaketemp.getHeadColor()));
+					snaketemp.getBodyColor(), snaketemp.getHeadColor()));
 			if (iterator.hasNext()) {
 				sb.append(',');
 			}
