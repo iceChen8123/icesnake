@@ -4,11 +4,9 @@ import ice.games.snake.base.Direction;
 import ice.games.snake.base.Location;
 import ice.games.snake.base.Settings;
 
-import java.awt.Color;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Random;
 
 import org.atmosphere.cpr.AtmosphereResource;
 
@@ -17,9 +15,6 @@ public class Snake {
 	public enum SnakeStatus {
 		wait, start, dead;
 	}
-
-	private static final Random randomForPosition = new Random();
-	private static final Random randomForColor = new Random();
 
 	private final int id;
 	private SnakeStatus status;
@@ -34,8 +29,8 @@ public class Snake {
 
 	public Snake(int id, AtmosphereResource resource) {
 		this.id = id;
-		this.bodyColor = getRandomHexColor();
-		this.headColor = genHeadColor();
+		this.bodyColor = ColorGenerator.getRandomHexColor();
+		this.headColor = ColorGenerator.getRandomHeadColor();
 		this.resource = resource;
 		resetState();
 		this.status = SnakeStatus.wait;
@@ -118,38 +113,11 @@ public class Snake {
 		return tail;
 	}
 
-	private static String genHeadColor() {
-		String[] colors = new String[] { "OrangeRed", "DarkOrange", "Lime", "Aqua", "DodgerBlue", "Fuchsia" };
-		return colors[randomForColor.nextInt(colors.length)];
-	}
-
-	private static String getRandomHexColor() {
-		float hue = randomForColor.nextFloat();
-		// sat between 0.1 and 0.3
-		float saturation = (randomForColor.nextInt(2000) + 1000) / 10000f;
-		float luminance = 0.9f;
-		Color color = Color.getHSBColor(hue, saturation, luminance);
-		return '#' + Integer.toHexString((color.getRGB() & 0xffffff) | 0x1000000).substring(1);
-	}
-
 	private void resetState() {
 		this.direction = Direction.NONE;
-		this.head = getRandomLocation();
+		this.head = PositionGenerator.getRandomLocation();
 		this.tail.clear();
 		this.length = Settings.DEFAULT_SNAKE_LENGTH;
-	}
-
-	private static Location getRandomLocation() {
-		int x = roundByGridSize(randomForPosition.nextInt(Settings.PLAYFIELD_WIDTH));
-		int y = roundByGridSize(randomForPosition.nextInt(Settings.PLAYFIELD_HEIGHT));
-		return new Location(x, y);
-	}
-
-	private static int roundByGridSize(int value) {
-		value = value + (Settings.GRID_SIZE / 2);
-		value = value / Settings.GRID_SIZE;
-		value = value * Settings.GRID_SIZE;
-		return value;
 	}
 
 	private synchronized void suicide() {
