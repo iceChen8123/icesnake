@@ -9,7 +9,8 @@
         #playground {
             width: 800px;
             height: 600px;
-            background-color: #555;
+            background-color: #000;
+            /* background-color: #555; */
         }
 
         #console-container {
@@ -59,7 +60,9 @@ Game.transport = 'websocket';
 
 function Snake() {
     this.snakeBody = [];
+    this.name = null;
     this.color = null;
+    this.headcolor = null;
 }
 
 Snake.prototype.draw = function (context) {
@@ -67,7 +70,21 @@ Snake.prototype.draw = function (context) {
 	for (var id in this.snakeBody) {
     	if(isfirst){
     		isfirst = false;
-	        context.fillStyle = 'red';
+	        context.fillStyle = this.headcolor;
+	       /*  switch (Game.direction) { TODO 先不画名字
+		        case 'up':
+			        context.fillText(myname,this.snakeBody[id].x+12, this.snakeBody[id].y);
+		            break;
+	            case 'down':
+			        context.fillText(myname,this.snakeBody[id].x+12, this.snakeBody[id].y);
+	                break;
+	            case 'left':
+			        context.fillText(myname,this.snakeBody[id].x, this.snakeBody[id].y-5);
+	                break;
+	            case 'right':
+			        context.fillText(myname,this.snakeBody[id].x, this.snakeBody[id].y-5);
+	                break;
+	        } */
     	}else{
 	        context.fillStyle = this.color;
     	}
@@ -110,7 +127,7 @@ var directioninfo = {'up':'上','down':'下','left':'左','right':'右'}
 Game.setDirection = function (direction) {
     Game.direction = direction;
     Game.socket.push(direction);
-    Console.log('方向 ' + directioninfo[direction]);
+    // Console.log('方向 ' + directioninfo[direction]);
 };
 
 Game.startGameLoop = function () {
@@ -144,11 +161,10 @@ Game.draw = function () {
     }
 };
 
-var meid ;
-Game.addSnake = function (id, color) {
-	meid = id;
+Game.addSnake = function (id, color, headcolor) {
     Game.entities[id] = new Snake();
     Game.entities[id].color = color;
+    Game.entities[id].headcolor = headcolor;
 };
 
 Game.updateSnake = function (id, snakeBody) {
@@ -230,14 +246,20 @@ Game.connect = (function (host) {
         }
 
         switch (packet.type) {
+	        case 'info':
+	            Console.log('你是小蛇蛇 '+ packet.data + ' 号');
+	            break;
+	        case 'wait':
+	            Console.log(packet.data);
+	            break;
             case 'update':
                 for (var i = 0; i < packet.data.length; i++) {
                     Game.updateSnake(packet.data[i].id, packet.data[i].body);
                 }
                 break;
-            case 'join':
+            case 'playinginfo':
                 for (var j = 0; j < packet.data.length; j++) {
-                    Game.addSnake(packet.data[j].id, packet.data[j].color);
+                    Game.addSnake(packet.data[j].id, packet.data[j].color, packet.data[j].headcolor);
                 }
                 break;
             case 'leave':
@@ -245,20 +267,16 @@ Game.connect = (function (host) {
 				Console.log('退出了一条小蛇蛇....'+packet.id);
                 break;
             case 'dead':
-                Console.log('小蛇蛇死了....拜拜...');
+                Game.removeSnake(packet.id);
+                Console.log('小蛇蛇 '+packet.id+' 死了....拜拜...');
                 Game.direction = 'none';
-                Game.removeSnake(meid);
                 break;
             case 'suicide':
                 Console.log('恭喜你,完美的追了自己的尾...^_^');
                 Game.direction = 'none';
                 break;
             case 'kill':
-                Console.log('你kill了一只可爱的小蛇蛇...');
-                break;
-            case 'wait':
-                Console.log("人满了...........");
-                Console.log(packet.data);
+                Console.log('你杀了一只可爱的小蛇蛇...');
                 break;
         }
     };
@@ -274,7 +292,7 @@ Console.log = (function (message) {
     p.style.wordWrap = 'break-word';
     p.innerHTML = message;
     console.appendChild(p);
-    while (console.childNodes.length > 10) {
+    while (console.childNodes.length > 100) {
         console.removeChild(console.firstChild);
     }
     console.scrollTop = console.scrollHeight;

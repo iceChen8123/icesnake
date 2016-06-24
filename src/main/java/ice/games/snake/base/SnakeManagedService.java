@@ -1,5 +1,4 @@
-
-package ice.games.snake;
+package ice.games.snake.base;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -7,12 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.atmosphere.config.service.Get;
 import org.atmosphere.config.service.ManagedService;
 import org.atmosphere.config.service.Post;
-import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListenerAdapter;
-import org.atmosphere.cpr.AtmosphereResourceFactory;
-import org.atmosphere.cpr.HeaderConfig;
 
 @ManagedService(path = "/snake")
 public class SnakeManagedService extends SnakeGame {
@@ -37,12 +33,14 @@ public class SnakeManagedService extends SnakeGame {
 
 			@Override
 			public void onDisconnect(AtmosphereResourceEvent event) {
-				AtmosphereRequest request = event.getResource().getRequest();
-				String s = request.getHeader(HeaderConfig.X_ATMOSPHERE_TRANSPORT);
-//				if (s != null && s.equalsIgnoreCase(HeaderConfig.DISCONNECT)) {
-					SnakeManagedService.super.onClose(resource);
-					uuids.remove(resource.uuid());
-				//				}
+				// AtmosphereRequest request = event.getResource().getRequest();
+				// String s =
+				// request.getHeader(HeaderConfig.X_ATMOSPHERE_TRANSPORT);
+				// if (s != null && s.equalsIgnoreCase(HeaderConfig.DISCONNECT))
+				// {
+				SnakeManagedService.super.onClose(resource);
+				uuids.remove(resource.uuid());
+				// }
 			}
 		});
 	}
@@ -50,10 +48,8 @@ public class SnakeManagedService extends SnakeGame {
 	@Post
 	public void onMessage(AtmosphereResource resource) {
 		try {
-			// Here we need to find the suspended AtmosphereResource
-			SnakeManagedService.super.onMessage(AtmosphereResourceFactory.getDefault().find(resource.uuid()), resource
-					.getRequest().getReader().readLine());
-		} catch (IOException e) {
+			super.onMessage(resource);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

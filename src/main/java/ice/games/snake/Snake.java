@@ -1,84 +1,86 @@
 package ice.games.snake;
 
-import java.awt.Color;
+import ice.games.snake.base.Direction;
+import ice.games.snake.base.Location;
+import ice.games.snake.base.Settings;
+
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Random;
 
 import org.atmosphere.cpr.AtmosphereResource;
 
 public class Snake {
 
-	private final int id;
-	private final AtmosphereResource resource;
+	public enum SnakeStatus {
+		wait, start, dead;
+	}
 
+	private final int id;
+	private SnakeStatus status;
+	private String headColor;
+	private final String bodyColor;
+	private Location head;
 	private Direction direction;
 	private int length = Settings.DEFAULT_SNAKE_LENGTH;
-	private Location head;
 	private final Deque<Location> tail = new ArrayDeque<Location>();
-	private final String hexColor;
 
-	private static final Random randomForPosition = new Random();
-	private static final Random randomForColor = new Random();
+	private final AtmosphereResource resource;
 
 	public Snake(int id, AtmosphereResource resource) {
 		this.id = id;
-		this.hexColor = getRandomHexColor();
+		this.bodyColor = ColorGenerator.getRandomHexColor();
+		this.headColor = ColorGenerator.getRandomHeadColor();
 		this.resource = resource;
 		resetState();
+		this.status = SnakeStatus.wait;
 	}
 
-	private void resetState() {
-		this.direction = Direction.NONE;
-		this.head = getRandomLocation();
-		this.tail.clear();
-		this.length = Settings.DEFAULT_SNAKE_LENGTH;
+	public synchronized void setDirection(Direction direction) {
+		if (status != SnakeStatus.wait) {
+			this.direction = direction;
+		}
 	}
 
-	private static String getRandomHexColor() {
-		float hue = randomForColor.nextFloat();
-		// sat between 0.1 and 0.3
-		float saturation = (randomForColor.nextInt(2000) + 1000) / 10000f;
-		float luminance = 0.9f;
-		Color color = Color.getHSBColor(hue, saturation, luminance);
-		return '#' + Integer.toHexString((color.getRGB() & 0xffffff) | 0x1000000).substring(1);
+	int getId() {
+		return id;
 	}
 
-	private static Location getRandomLocation() {
-		int x = roundByGridSize(randomForPosition.nextInt(Settings.PLAYFIELD_WIDTH));
-		int y = roundByGridSize(randomForPosition.nextInt(Settings.PLAYFIELD_HEIGHT));
-		return new Location(x, y);
+	String getBodyColor() {
+		return bodyColor;
 	}
 
-	private static int roundByGridSize(int value) {
-		value = value + (Settings.GRID_SIZE / 2);
-		value = value / Settings.GRID_SIZE;
-		value = value * Settings.GRID_SIZE;
-		return value;
+	String getHeadColor() {
+		return headColor;
 	}
 
-	private synchronized void suicide() {
-		resetState();
-		sendMessage(Settings.MESSAGE_SUICIDE);
-
+	void setBoss() {
+		headColor = "white";
 	}
 
-	private synchronized void dead() {
-		resetState();
-		sendMessage(Settings.MESSAGE_DEAD);
+	boolean isDead() {
+		return status == SnakeStatus.dead;
 	}
 
-	private synchronized void reward() {
-		length++;
-		sendMessage(Settings.MESSAGE_KILL);
+	synchronized String getLocationsJson() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(head.x), Integer.valueOf(head.y)));
+		for (Location location : tail) {
+			sb.append(',');
+			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x), Integer.valueOf(location.y)));
+		}
+		return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(id), sb.toString());
 	}
 
-	protected void sendMessage(String msg) {
+	void startPlay() {
+		status = SnakeStatus.start;
+	}
+
+	void sendMessage(String msg) {
 		resource.getResponse().write(msg);
 	}
 
-	public synchronized void update(Collection<Snake> snakes) {
+	synchronized void update(Collection<Snake> snakes) {
 		Location nextLocation = head.getAdjacentLocation(direction);
 		if (nextLocation.x >= Settings.PLAYFIELD_WIDTH) {
 			nextLocation.x = 0;
@@ -103,17 +105,31 @@ public class Snake {
 		handleCollisions(snakes);
 	}
 
+	private void resetState() {
+		this.direction = Direction.NONE;
+		this.head = PositionGenerator.getRandomLocation();
+		this.tail.clear();
+		this.length = Settings.DEFAULT_SNAKE_LENGTH;
+	}
+
+	private synchronized void suicide() {
+		status = SnakeStatus.dead;
+		resetState();
+		sendMessage(Settings.MESSAGE_SUICIDE);
+
+	}
+
 	private void handleCollisions(Collection<Snake> snakes) {
 		for (Snake snake : snakes) {
 			if (id != snake.id) {
-				boolean headCollision = snake.getHead().equals(head);
-				boolean tailCollision = snake.getTail().contains(head);
+				boolean headCollision = snake.head.equals(head);
+				boolean tailCollision = snake.tail.contains(head);
 				if (headCollision || tailCollision) {
 					dead();
 					snake.reward();
 				}
 			} else {
-				boolean tailCollision = snake.getTail().contains(head);
+				boolean tailCollision = snake.tail.contains(head);
 				if (tailCollision) {
 					suicide();
 				}
@@ -121,33 +137,14 @@ public class Snake {
 		}
 	}
 
-	public synchronized Location getHead() {
-		return head;
+	private void dead() {
+		status = SnakeStatus.dead;
+		resetState();
 	}
 
-	public synchronized Collection<Location> getTail() {
-		return tail;
+	private void reward() {
+		length++;
+		sendMessage(Settings.MESSAGE_KILL);
 	}
 
-	public synchronized void setDirection(Direction direction) {
-		this.direction = direction;
-	}
-
-	public synchronized String getLocationsJson() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(head.x), Integer.valueOf(head.y)));
-		for (Location location : tail) {
-			sb.append(',');
-			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x), Integer.valueOf(location.y)));
-		}
-		return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(id), sb.toString());
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getHexColor() {
-		return hexColor;
-	}
 }

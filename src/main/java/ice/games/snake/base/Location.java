@@ -1,4 +1,5 @@
-package ice.games.snake;
+package ice.games.snake.base;
+
 
 public class Location {
 

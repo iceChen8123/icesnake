@@ -1,6 +1,6 @@
 package ice.snake;
 
-import ice.games.snake.SnakeManagedService;
+import ice.games.snake.base.SnakeManagedService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,8 +18,11 @@ public class SnakeServer {
 
 	public static void main(String[] args) throws IOException {
 		Config.Builder b = new Config.Builder();
-		b.resource(SnakeManagedService.class).resource("D:\\workspacem\\icesnake\\src\\main\\resources").port(PORT)
-				.host("127.0.0.1").build();
+		String resourcepath = "D:\\workspacem\\icesnake\\src\\main\\resources";
+		if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") < 0) {
+			resourcepath = "/home/ice/jyzq/icesnake/target/classes";
+		}
+		b.resource(SnakeManagedService.class).resource(resourcepath).port(PORT).host("127.0.0.1").build();
 		Nettosphere s = new Nettosphere.Builder().config(b.build()).build();
 		s.start();
 		String a = "";

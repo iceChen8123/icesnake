@@ -1,4 +1,4 @@
-package ice.games.snake;
+package ice.games.snake.base;
 
 public class Settings {
 	public static final int PLAYFIELD_WIDTH = 800;
@@ -8,9 +8,6 @@ public class Settings {
 
 	public static final String MESSAGE_KILL = "{'type': 'kill'}";
 
-	public static final String MESSAGE_DEAD = "{'type': 'dead'}";
-
 	public static final String MESSAGE_SUICIDE = "{'type': 'suicide'}";
 
-	public static final String MESSAGE_WAIT = "{'type': 'wait'}";
 }
