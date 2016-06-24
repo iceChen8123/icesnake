@@ -59,7 +59,7 @@ public class SnakeManager implements Callable<String> {
 	}
 
 	private void sendPlayingSnakeInfoToNew(Snake snake) {
-		snake.sendMessage(String.format("{'type': 'playinginfo','data':[%s]}", getPlayingSnakeInfo()));
+		snake.sendMessage(getPlayingSnakeInfo());
 	}
 
 	private void activeWaitSnake() {
@@ -73,7 +73,7 @@ public class SnakeManager implements Callable<String> {
 	}
 
 	private void broadcastPlayingSnakeInfo() {
-		snakeBroadcaster.broadcast(String.format("{'type': 'playinginfo','data':[%s]}", getPlayingSnakeInfo()));
+		snakeBroadcaster.broadcast(getPlayingSnakeInfo());
 	}
 
 	private String getPlayingSnakeInfo() {
@@ -86,7 +86,7 @@ public class SnakeManager implements Callable<String> {
 				sb.append(',');
 			}
 		}
-		return sb.toString();
+		return String.format("{'type': 'playinginfo','data':[%s]}", sb.toString());
 	}
 
 	@Override
