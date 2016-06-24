@@ -62,7 +62,7 @@ public class Snake {
 		return status == SnakeStatus.dead;
 	}
 
-	protected synchronized String getLocationsJson() {
+	synchronized String getLocationsJson() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(head.x), Integer.valueOf(head.y)));
 		for (Location location : tail) {
@@ -72,15 +72,15 @@ public class Snake {
 		return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(id), sb.toString());
 	}
 
-	protected void startPlay() {
+	void startPlay() {
 		status = SnakeStatus.start;
 	}
 
-	protected void sendMessage(String msg) {
+	void sendMessage(String msg) {
 		resource.getResponse().write(msg);
 	}
 
-	protected synchronized void update(Collection<Snake> snakes) {
+	synchronized void update(Collection<Snake> snakes) {
 		Location nextLocation = head.getAdjacentLocation(direction);
 		if (nextLocation.x >= Settings.PLAYFIELD_WIDTH) {
 			nextLocation.x = 0;
@@ -105,14 +105,6 @@ public class Snake {
 		handleCollisions(snakes);
 	}
 
-	private synchronized Location getHead() {
-		return head;
-	}
-
-	private synchronized Collection<Location> getTail() {
-		return tail;
-	}
-
 	private void resetState() {
 		this.direction = Direction.NONE;
 		this.head = PositionGenerator.getRandomLocation();
@@ -127,32 +119,32 @@ public class Snake {
 
 	}
 
-	private synchronized void dead() {
-		status = SnakeStatus.dead;
-		resetState();
-	}
-
-	private synchronized void reward() {
-		length++;
-		sendMessage(Settings.MESSAGE_KILL);
-	}
-
 	private void handleCollisions(Collection<Snake> snakes) {
 		for (Snake snake : snakes) {
 			if (id != snake.id) {
-				boolean headCollision = snake.getHead().equals(head);
-				boolean tailCollision = snake.getTail().contains(head);
+				boolean headCollision = snake.head.equals(head);
+				boolean tailCollision = snake.tail.contains(head);
 				if (headCollision || tailCollision) {
 					dead();
 					snake.reward();
 				}
 			} else {
-				boolean tailCollision = snake.getTail().contains(head);
+				boolean tailCollision = snake.tail.contains(head);
 				if (tailCollision) {
 					suicide();
 				}
 			}
 		}
+	}
+
+	private void dead() {
+		status = SnakeStatus.dead;
+		resetState();
+	}
+
+	private void reward() {
+		length++;
+		sendMessage(Settings.MESSAGE_KILL);
 	}
 
 }
