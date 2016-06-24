@@ -1,4 +1,9 @@
-package ice.games.snake;
+package ice.games.snake.base;
+
+import ice.games.snake.SnakeManager;
+import ice.games.snake.processor.MessageListener;
+import ice.games.snake.processor.OncloseProccesor;
+import ice.games.snake.processor.OnopenProccesor;
 
 import java.io.IOException;
 

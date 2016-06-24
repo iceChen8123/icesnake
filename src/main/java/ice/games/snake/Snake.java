@@ -1,5 +1,9 @@
 package ice.games.snake;
 
+import ice.games.snake.base.Direction;
+import ice.games.snake.base.Location;
+import ice.games.snake.base.Settings;
+
 import java.awt.Color;
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -49,7 +53,7 @@ public class Snake {
 		return status;
 	}
 
-	protected synchronized void setDirection(Direction direction) {
+	public synchronized void setDirection(Direction direction) {
 		if (status != SnakeStatus.wait) {
 			this.direction = direction;
 		}

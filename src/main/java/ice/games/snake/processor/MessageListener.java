@@ -1,10 +1,13 @@
-package ice.games.snake;
+package ice.games.snake.processor;
+
+import ice.games.snake.Snake;
+import ice.games.snake.base.Direction;
 
 import org.atmosphere.cpr.AtmosphereResource;
 
 public class MessageListener {
 
-	static void onMessage(AtmosphereResource resource, String message) {
+	public static void onMessage(AtmosphereResource resource, String message) {
 		Snake snake = (Snake) resource.session().getAttribute("snake");
 		if ("left".equals(message)) {
 			snake.setDirection(Direction.LEFT);

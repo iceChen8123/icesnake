@@ -1,4 +1,4 @@
-package ice.games.snake;
+package ice.games.snake.base;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;

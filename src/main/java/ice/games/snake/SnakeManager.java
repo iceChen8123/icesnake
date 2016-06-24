@@ -1,6 +1,7 @@
 package ice.games.snake;
 
 import ice.games.snake.Snake.SnakeStatus;
+import ice.games.snake.base.NewSnakeBroadcaster;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,14 +37,14 @@ public class SnakeManager implements Callable<String> {
 		this.snakeBroadcaster = new NewSnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
 	}
 
-	synchronized void addNewPlaySnake(Snake snake) {
+	public synchronized void addNewPlaySnake(Snake snake) {
 		snake.sendMessage(getPlayingSnakeInfo());
 		waitqueue.add(snake);
 		logger.info("蛇 {} 进入游戏,开始等待...", snake.getId());
 		afterJoinWaitQueue(snake);
 	}
 
-	void removeOffLineSnake(AtmosphereResource resource) {
+	public void removeOffLineSnake(AtmosphereResource resource) {
 		snakeBroadcaster.removeOffLineSnake(resource);
 		Snake snake = (Snake) resource.session().getAttribute("snake");
 		playingSnakes.remove(snake.getId());

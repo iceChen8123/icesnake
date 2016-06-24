@@ -1,4 +1,6 @@
-package ice.games.snake;
+package ice.games.snake.base;
+
+import ice.games.snake.SnakeManager;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -28,11 +30,11 @@ public class NewSnakeBroadcaster {
 
 	private ReentrantLock broadcastLock = new ReentrantLock();
 
-	void removeOffLineSnake(AtmosphereResource resource) {
+	public void removeOffLineSnake(AtmosphereResource resource) {
 		broadcaster.removeAtmosphereResource(resource);
 	}
 
-	void broadcast(String message) {
+	public void broadcast(String message) {
 		broadcastLock.lock();
 		if (isFirst) {
 			isFirst = false; // 只有广播过，才开始，因为会初始化两个广播类，这样就能少一个空跑的线程

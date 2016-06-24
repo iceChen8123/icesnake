@@ -1,4 +1,6 @@
-package ice.games.snake;
+package ice.games.snake.processor;
+
+import ice.games.snake.SnakeManager;
 
 import org.atmosphere.cpr.AtmosphereResource;
 

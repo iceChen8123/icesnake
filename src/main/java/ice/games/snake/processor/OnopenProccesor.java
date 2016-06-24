@@ -1,4 +1,7 @@
-package ice.games.snake;
+package ice.games.snake.processor;
+
+import ice.games.snake.Snake;
+import ice.games.snake.SnakeManager;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;

@@ -1,4 +1,4 @@
-package ice.games.snake;
+package ice.games.snake.base;
 
 public enum Direction {
     NONE, UP, DOWN, RIGHT, LEFT

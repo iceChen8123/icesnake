@@ -1,4 +1,4 @@
-package ice.games.snake;
+package ice.games.snake.base;
 
 public class Settings {
 	public static final int PLAYFIELD_WIDTH = 800;

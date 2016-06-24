@@ -1,6 +1,6 @@
 package ice.snake;
 
-import ice.games.snake.SnakeManagedService;
+import ice.games.snake.base.SnakeManagedService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
