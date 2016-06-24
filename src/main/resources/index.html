@@ -57,6 +57,8 @@ Game.direction = 'none';
 Game.gridSize = 10;
 Game.transport = 'websocket';
 
+var myname;
+
 function Snake() {
     this.snakeBody = [];
     this.color = null;
@@ -68,6 +70,20 @@ Snake.prototype.draw = function (context) {
     	if(isfirst){
     		isfirst = false;
 	        context.fillStyle = 'red';
+	        switch (Game.direction) {
+		        case 'up':
+			        context.fillText(myname,this.snakeBody[id].x+12, this.snakeBody[id].y);
+		            break;
+	            case 'down':
+			        context.fillText(myname,this.snakeBody[id].x+12, this.snakeBody[id].y);
+	                break;
+	            case 'left':
+			        context.fillText(myname,this.snakeBody[id].x, this.snakeBody[id].y-5);
+	                break;
+	            case 'right':
+			        context.fillText(myname,this.snakeBody[id].x, this.snakeBody[id].y-5);
+	                break;
+	        }
     	}else{
 	        context.fillStyle = this.color;
     	}
@@ -228,6 +244,10 @@ Game.connect = (function (host) {
         }
 
         switch (packet.type) {
+	        case 'info':
+	        	myname = packet.data;
+	            Console.log('你是小蛇蛇 '+ packet.data + ' 号');
+	            break;
 	        case 'wait':
 	            Console.log(packet.data);
 	            break;

@@ -34,6 +34,7 @@ public class SnakeManager implements Callable<String> {
 		sendPlayingSnakeInfoToNew(snake);
 		waitqueue.add(snake);
 		logger.info("蛇 {} 进入游戏,等待开始...", snake.getId());
+		snake.sendMessage(String.format("{'type': 'info', 'data' : '%s'}", snake.getId()));
 		if (playingSnakes.size() >= MAX_ALIVE_SNAKE) {
 			snake.sendMessage(String.format("{'type': 'wait', 'data' : '请稍等,蛇满为患了,您前面还有  %s 条小蛇蛇在焦急等待...'}",
 					waitqueue.size() - 1)); // 因为一来，就进等待队列，所以里面总会多一个。
