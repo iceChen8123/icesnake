@@ -58,10 +58,9 @@ Game.direction = 'none';
 Game.gridSize = 10;
 Game.transport = 'websocket';
 
-var myname;
-
 function Snake() {
     this.snakeBody = [];
+    this.name = null;
     this.color = null;
     this.headcolor = null;
 }
@@ -248,7 +247,6 @@ Game.connect = (function (host) {
 
         switch (packet.type) {
 	        case 'info':
-	        	myname = packet.data;
 	            Console.log('你是小蛇蛇 '+ packet.data + ' 号');
 	            break;
 	        case 'wait':
@@ -264,11 +262,6 @@ Game.connect = (function (host) {
                     Game.addSnake(packet.data[j].id, packet.data[j].color, packet.data[j].headcolor);
                 }
                 break;
-            case 'join':
-                for (var j = 0; j < packet.data.length; j++) {
-                    Game.addSnake(packet.data[j].id, packet.data[j].color, packet.data[j].headcolor);
-                }
-                break;
             case 'leave':
                 Game.removeSnake(packet.id);
 				Console.log('退出了一条小蛇蛇....'+packet.id);
@@ -276,7 +269,7 @@ Game.connect = (function (host) {
             case 'dead':
                 Game.removeSnake(packet.id);
                 Console.log('小蛇蛇 '+packet.id+' 死了....拜拜...');
-                //Game.direction = 'none';
+                Game.direction = 'none';
                 break;
             case 'suicide':
                 Console.log('恭喜你,完美的追了自己的尾...^_^');

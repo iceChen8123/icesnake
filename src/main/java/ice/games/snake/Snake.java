@@ -112,7 +112,6 @@ public class Snake {
 	}
 
 	private static String getRandomHexColor() {
-		String[] colors = new String[] { "OrangeRed", "DarkOrange", "Lime", "Aqua", "DodgerBlue", "Fuchsia" };
 		float hue = randomForColor.nextFloat();
 		// sat between 0.1 and 0.3
 		float saturation = (randomForColor.nextInt(2000) + 1000) / 10000f;

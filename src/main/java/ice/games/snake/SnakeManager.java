@@ -73,7 +73,7 @@ public class SnakeManager implements Callable<String> {
 	}
 
 	private void broadcastPlayingSnakeInfo() {
-		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", getPlayingSnakeInfo()));
+		snakeBroadcaster.broadcast(String.format("{'type': 'playinginfo','data':[%s]}", getPlayingSnakeInfo()));
 	}
 
 	private String getPlayingSnakeInfo() {
