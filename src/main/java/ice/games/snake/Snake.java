@@ -41,30 +41,30 @@ public class Snake {
 		this.status = SnakeStatus.wait;
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public String getHexColor() {
-		return hexColor;
-	}
-
-	public String getHeadColor() {
-		return headColor;
-	}
-
-	public void setBoss() {
-		headColor = "white";
-	}
-
-	public boolean isDead() {
-		return status == SnakeStatus.dead;
-	}
-
 	public synchronized void setDirection(Direction direction) {
 		if (status != SnakeStatus.wait) {
 			this.direction = direction;
 		}
+	}
+
+	int getId() {
+		return id;
+	}
+
+	String getHexColor() {
+		return hexColor;
+	}
+
+	String getHeadColor() {
+		return headColor;
+	}
+
+	void setBoss() {
+		headColor = "white";
+	}
+
+	boolean isDead() {
+		return status == SnakeStatus.dead;
 	}
 
 	protected synchronized String getLocationsJson() {
