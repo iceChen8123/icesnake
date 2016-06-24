@@ -59,17 +59,7 @@ public class SnakeManager implements Callable<String> {
 	}
 
 	private void sendPlayingSnakeInfoToNew(Snake snake) {
-		Snake snaketemp;
-		StringBuilder sb = new StringBuilder();
-		for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
-			snaketemp = iterator.next();
-			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snaketemp.getId()),
-					snaketemp.getHexColor()));
-			if (iterator.hasNext()) {
-				sb.append(',');
-			}
-		}
-		snake.sendMessage(String.format("{'type': 'playinginfo','data':[%s]}", sb.toString()));
+		snake.sendMessage(String.format("{'type': 'playinginfo','data':[%s]}", getPlayingSnakeInfo()));
 	}
 
 	private void activeWaitSnake() {
@@ -83,16 +73,20 @@ public class SnakeManager implements Callable<String> {
 	}
 
 	private void broadcastPlayingSnakeInfo() {
-		Snake snake;
+		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", getPlayingSnakeInfo()));
+	}
+
+	private String getPlayingSnakeInfo() {
 		StringBuilder sb = new StringBuilder();
 		for (Iterator<Snake> iterator = getPlayingSnakes().iterator(); iterator.hasNext();) {
-			snake = iterator.next();
-			sb.append(String.format("{id: %d, color: '%s'}", Integer.valueOf(snake.getId()), snake.getHexColor()));
+			Snake snaketemp = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s', headcolor: '%s'}", Integer.valueOf(snaketemp.getId()),
+					snaketemp.getHexColor(), snaketemp.getHeadColor()));
 			if (iterator.hasNext()) {
 				sb.append(',');
 			}
 		}
-		snakeBroadcaster.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+		return sb.toString();
 	}
 
 	@Override

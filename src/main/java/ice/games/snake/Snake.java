@@ -24,12 +24,14 @@ public class Snake {
 	private Direction direction;
 	private Location head;
 	private final String hexColor;
+	private final String headColor;
 
 	private final AtmosphereResource resource;
 
 	public Snake(int id, AtmosphereResource resource) {
 		this.id = id;
 		this.hexColor = getRandomHexColor();
+		this.headColor = genHeadColor();
 		this.resource = resource;
 		resetState();
 		this.status = SnakeStatus.wait;
@@ -104,7 +106,13 @@ public class Snake {
 		return tail;
 	}
 
+	private static String genHeadColor() {
+		String[] colors = new String[] { "OrangeRed", "DarkOrange", "Lime", "Aqua", "DodgerBlue", "Fuchsia" };
+		return colors[randomForColor.nextInt(colors.length)];
+	}
+
 	private static String getRandomHexColor() {
+		String[] colors = new String[] { "OrangeRed", "DarkOrange", "Lime", "Aqua", "DodgerBlue", "Fuchsia" };
 		float hue = randomForColor.nextFloat();
 		// sat between 0.1 and 0.3
 		float saturation = (randomForColor.nextInt(2000) + 1000) / 10000f;
@@ -166,6 +174,10 @@ public class Snake {
 				}
 			}
 		}
+	}
+
+	public String getHeadColor() {
+		return headColor;
 	}
 
 }

@@ -9,7 +9,8 @@
         #playground {
             width: 800px;
             height: 600px;
-            background-color: #555;
+            background-color: #000;
+            /* background-color: #555; */
         }
 
         #console-container {
@@ -62,6 +63,7 @@ var myname;
 function Snake() {
     this.snakeBody = [];
     this.color = null;
+    this.headcolor = null;
 }
 
 Snake.prototype.draw = function (context) {
@@ -69,8 +71,8 @@ Snake.prototype.draw = function (context) {
 	for (var id in this.snakeBody) {
     	if(isfirst){
     		isfirst = false;
-	        context.fillStyle = 'red';
-	        switch (Game.direction) {
+	        context.fillStyle = this.headcolor;
+	       /*  switch (Game.direction) { TODO 先不画名字
 		        case 'up':
 			        context.fillText(myname,this.snakeBody[id].x+12, this.snakeBody[id].y);
 		            break;
@@ -83,7 +85,7 @@ Snake.prototype.draw = function (context) {
 	            case 'right':
 			        context.fillText(myname,this.snakeBody[id].x, this.snakeBody[id].y-5);
 	                break;
-	        }
+	        } */
     	}else{
 	        context.fillStyle = this.color;
     	}
@@ -160,9 +162,10 @@ Game.draw = function () {
     }
 };
 
-Game.addSnake = function (id, color) {
+Game.addSnake = function (id, color, headcolor) {
     Game.entities[id] = new Snake();
     Game.entities[id].color = color;
+    Game.entities[id].headcolor = headcolor;
 };
 
 Game.updateSnake = function (id, snakeBody) {
@@ -258,12 +261,12 @@ Game.connect = (function (host) {
                 break;
             case 'playinginfo':
                 for (var j = 0; j < packet.data.length; j++) {
-                    Game.addSnake(packet.data[j].id, packet.data[j].color);
+                    Game.addSnake(packet.data[j].id, packet.data[j].color, packet.data[j].headcolor);
                 }
                 break;
             case 'join':
                 for (var j = 0; j < packet.data.length; j++) {
-                    Game.addSnake(packet.data[j].id, packet.data[j].color);
+                    Game.addSnake(packet.data[j].id, packet.data[j].color, packet.data[j].headcolor);
                 }
                 break;
             case 'leave':
