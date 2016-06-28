@@ -12,6 +12,11 @@ import org.atmosphere.cpr.AtmosphereResource;
 
 public class Snake {
 
+	@Override
+	public String toString() {
+		return "Snake [id=" + id + "]";
+	}
+
 	public enum SnakeStatus {
 		wait, start, dead;
 	}
@@ -74,6 +79,7 @@ public class Snake {
 
 	void startPlay() {
 		status = SnakeStatus.start;
+		sendMessage(String.format("{'type': 'info', 'data' : '%s'}", id));
 	}
 
 	void sendMessage(String msg) {

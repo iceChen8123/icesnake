@@ -2,12 +2,10 @@ package ice.games.snake;
 
 import ice.games.snake.base.SnakeBroadcaster;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,9 +26,7 @@ public class SnakeManager implements Callable<String> {
 
 	private SnakeBroadcaster snakeBroadcaster;
 
-	private Snake boss;
-
-	private List<Snake> partnerList = new ArrayList<Snake>();
+	private GameRule1 gameRule = new GameRule1();
 
 	public SnakeManager() {
 		this.snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
@@ -50,7 +46,7 @@ public class SnakeManager implements Callable<String> {
 		logger.info("蛇 {} 退出游戏...", snake.getId());
 		waitqueue.remove(snake);// TODO 当等待的人多了以后，这里可能会出问题
 
-		takeoffRole(snake);
+		gameRule.removeRole(snake);
 
 		Integer snakeId = (Integer) resource.session().getAttribute("id");
 		snakeBroadcaster.broadcast(String.format("{'type': 'leave', 'id': %d}", snakeId));
@@ -64,8 +60,7 @@ public class SnakeManager implements Callable<String> {
 		if (waitqueue.size() > 0) {
 			Snake firstWait = waitqueue.removeFirst();
 			firstWait.startPlay();
-			firstWait.sendMessage(String.format("{'type': 'info', 'data' : '%s'}", firstWait.getId()));
-			setRole(firstWait);
+			gameRule.addRole(firstWait);
 			playingSnakes.put(Integer.valueOf(firstWait.getId()), firstWait);
 			logger.info("蛇 {} 开始游戏...", firstWait.getId());
 			snakeBroadcaster.broadcast(getPlayingSnakeInfo());
@@ -112,27 +107,10 @@ public class SnakeManager implements Callable<String> {
 	private synchronized void removeDeadSnake(Snake snake) {
 		int snakeId = snake.getId();
 		playingSnakes.remove(snakeId);
-		takeoffRole(snake);
+		gameRule.removeRole(snake);
 		logger.info("蛇 {} 死了,移出游戏队列...", snakeId);
 		snakeBroadcaster.broadcast(String.format("{'type': 'dead', 'id': %d}", snakeId));
 		rePlaySnake(snake);
-	}
-
-	private void setRole(Snake firstWait) {
-		if (boss == null) {
-			firstWait.setBoss();
-			boss = firstWait;
-		} else {
-			partnerList.add(firstWait);
-		}
-	}
-
-	private void takeoffRole(Snake snake) {
-		if (boss == snake) {
-			boss = null;
-		} else {
-			partnerList.remove(snake);
-		}
 	}
 
 	private synchronized void rePlaySnake(Snake snake) {
