@@ -27,8 +27,8 @@ public class GameRule1 {
 
 	public void removeRole(Snake snake) {
 		if (boss == snake) {
-			boss = null;
 			logger.info("boss {} 没了....", boss.getId());
+			boss = null;
 		} else {
 			partners.remove(snake.getId());
 			logger.info("partnerList 退出了 {}, 一共是 {}", new Object[] { snake.getId(), partners.toString() });
