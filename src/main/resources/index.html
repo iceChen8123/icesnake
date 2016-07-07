@@ -16,7 +16,7 @@
         #console-container {
             float: left;
             margin-left: 15px;
-            width: 300px;
+            width: 200px;
         }
 
         #console {
@@ -208,7 +208,7 @@ Game.connect = (function (host) {
 
     request.onClose = function (response) {
         if (response.state == "unsubscribe") {
-            Console.log('Info: ' + Game.transport + ' closed.');
+            //Console.log('Info: ' + Game.transport + ' closed.');
             Game.stopGameLoop();
         }
     };
@@ -241,7 +241,7 @@ Game.connect = (function (host) {
         try {
             packet = eval('(' + message + ')'); //jQuery.parseJSON(message);
         } catch (e) {
-            console.log('Message: ', message);
+            //console.log('Message: ', message);
             return;
         }
 

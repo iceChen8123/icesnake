@@ -18,7 +18,7 @@ public class SnakeServer {
 
 	public static void main(String[] args) throws IOException {
 		Config.Builder b = new Config.Builder();
-		String resourcepath = "D:\\workspacem\\icesnake\\src\\main\\resources";
+		String resourcepath = "D:\\download\\icesnake\\src\\main\\resources";
 		if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") < 0) {
 			resourcepath = "/home/ice/jyzq/icesnake/target/classes";
 		}
