@@ -15,15 +15,15 @@
 
         #console-container {
             float: left;
-            margin-left: 15px;
-            width: 200px;
+            margin-left: 5px;
+            width: 180px;
         }
 
         #console {
             border: 1px solid #CCCCCC;
             border-right-color: #999999;
             border-bottom-color: #999999;
-            height: 600px;
+            height: 200px;
             overflow-y: scroll;
             padding-left: 5px;
             padding-right: 5px;
@@ -33,6 +33,7 @@
         #console p {
             padding: 0;
             margin: 0;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -45,10 +46,34 @@
 <div style="float: left">
     <canvas id="playground" width="800" height="600"></canvas>
 </div>
-<div id="console-container">
-    <div id="console"></div>
+<div style="float: left">
+<table style="width: 800px;" border="0" cellpadding="3" cellspacing="1" align="center" >
+	<tr>
+	  <td rowspan="3" width="200px;" ><div id="console-container">
+		    <div id="console"></div>
+		</div>
+	</td>
+	  <td></td>
+	  <td align="center" bgcolor="#000" onclick="go('up')"><span style="font-size: 72px;color: white;">↑</span></td>
+	  <td></td>
+	</tr>   
+	<tr>
+	  <td align="center" bgcolor="#000" onclick="go('left')"><span style="font-size: 72px;color: white;">←</span></td>
+	  <td></td>
+	  <td align="center" bgcolor="#000" onclick="go('right')"><span style="font-size: 72px;color: white;">→</span></td>
+	</tr>
+	<tr>
+	  <td></td>
+	  <td align="center" bgcolor="#000" onclick="go('down')"><span style="font-size: 72px;color: white;">↓</span></td>
+	  <td></td>
+	</tr>
+</table>
 </div>
 <script type="text/javascript">
+
+function go(direction){
+	Game.setDirection(direction);
+}
 
 var Game = {};
 
@@ -304,6 +329,7 @@ Console.log = (function (message) {
 
 Game.initialize();
 </script>
-<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1259590036'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259590036%26show%3Dpic' type='text/javascript'%3E%3C/script%3E"));</script>
+<div style="float: left;"><script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1259590036'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259590036%26show%3Dpic' type='text/javascript'%3E%3C/script%3E"));</script></div>
+
 </body>
 </html>
