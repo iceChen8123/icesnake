@@ -300,6 +300,11 @@ Game.connect = (function (host) {
                 Console.log('小蛇蛇 '+packet.id+' 死了....拜拜...');
                 Game.direction = 'none';
                 break;
+            case 'timeout':
+                Game.removeSnake(packet.id);
+                Console.log('小蛇蛇 '+packet.id+' 很久没反应了...自动下线...');
+                Game.direction = 'none';
+                break;
             case 'suicide':
                 Console.log('恭喜你,完美的追了自己的尾...^_^');
                 Game.direction = 'none';

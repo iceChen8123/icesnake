@@ -90,6 +90,8 @@ public class SnakeManager implements Callable<String> {
 													// 这边需要注意下，在一个tick内，是否要多次获取所有蛇???
 				if (snake.isDead()) {
 					removeDeadSnake(snake);
+				} else if (snake.isTimeOutDead()) {
+					removeTimeOutSnake(snake);
 				} else {
 					sb.append(snake.getLocationsJson());
 					if (iterator.hasNext()) {
@@ -102,6 +104,15 @@ public class SnakeManager implements Callable<String> {
 			logger.error("Caught to prevent timer from shutting down", e);
 		}
 		return "";
+	}
+
+	private synchronized void removeTimeOutSnake(Snake snake) {
+		int snakeId = snake.getId();
+		playingSnakes.remove(snakeId);
+		gameRule.removeRole(snake);
+		logger.info("蛇 {} 无反应超时了,移出游戏队列...", snakeId);
+		snakeBroadcaster.broadcast(String.format("{'type': 'timeout', 'id': %d}", snakeId));
+		rePlaySnake(snake);
 	}
 
 	private synchronized void removeDeadSnake(Snake snake) {

@@ -18,7 +18,7 @@ public class Snake {
 	}
 
 	public enum SnakeStatus {
-		wait, start, dead;
+		wait, start, dead, timeout;
 	}
 
 	private final int id;
@@ -116,7 +116,7 @@ public class Snake {
 
 		if (isTimeOut()) {
 			System.out.println(id + " 蛇蛇 15秒没动~自动踢掉...");
-			dead();
+			timeoutdown();
 		}
 		handleCollisions(snakes);
 	}
@@ -167,9 +167,18 @@ public class Snake {
 		resetState();
 	}
 
+	private void timeoutdown() {
+		status = SnakeStatus.timeout;
+		resetState();
+	}
+
 	private void reward() {
 		length++;
 		sendMessage(Settings.MESSAGE_KILL);
+	}
+
+	boolean isTimeOutDead() {
+		return status == SnakeStatus.timeout;
 	}
 
 }
