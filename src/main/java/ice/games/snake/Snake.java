@@ -44,7 +44,12 @@ public class Snake {
 	public synchronized void setDirection(Direction direction) {
 		if (status != SnakeStatus.wait) {
 			this.direction = direction;
+			markLastTime();
 		}
+	}
+
+	private void markLastTime() {
+		lastSetTime = System.currentTimeMillis();
 	}
 
 	int getId() {
@@ -79,6 +84,7 @@ public class Snake {
 
 	void startPlay() {
 		status = SnakeStatus.start;
+		markLastTime();
 		sendMessage(String.format("{'type': 'info', 'data' : '%s'}", id));
 	}
 
@@ -108,7 +114,20 @@ public class Snake {
 			head = nextLocation;
 		}
 
+		if (isTimeOut()) {
+			System.out.println(id + " 蛇蛇 15秒没动~自动踢掉...");
+			dead();
+		}
 		handleCollisions(snakes);
+	}
+
+	private long lastSetTime = System.currentTimeMillis();
+
+	private boolean isTimeOut() {
+		if (status == SnakeStatus.start) {
+			return System.currentTimeMillis() - lastSetTime > 15 * 1000;
+		}
+		return false;
 	}
 
 	private void resetState() {
