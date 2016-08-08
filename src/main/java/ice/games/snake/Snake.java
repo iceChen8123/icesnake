@@ -22,6 +22,7 @@ public class Snake {
 	}
 
 	private final int id;
+	private String name;
 	private SnakeStatus status;
 	private String headColor;
 	private final String bodyColor;
@@ -31,12 +32,14 @@ public class Snake {
 	private final Deque<Location> tail = new ArrayDeque<Location>();
 
 	private final AtmosphereResource resource;
+	private final SnakeManager snakeManager;
 
-	public Snake(int id, AtmosphereResource resource) {
+	public Snake(int id, AtmosphereResource resource, SnakeManager snakeManager) {
 		this.id = id;
 		this.bodyColor = ColorGenerator.getRandomHexColor();
 		this.headColor = ColorGenerator.getRandomHeadColor();
 		this.resource = resource;
+		this.snakeManager = snakeManager;
 		resetState();
 		this.status = SnakeStatus.wait;
 	}
@@ -54,6 +57,15 @@ public class Snake {
 
 	int getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+		snakeManager.loudMyName(id, name);
 	}
 
 	String getBodyColor() {

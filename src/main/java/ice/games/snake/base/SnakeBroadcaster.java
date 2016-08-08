@@ -38,6 +38,7 @@ public class SnakeBroadcaster {
 		broadcastLock.lock();
 		if (isFirst) {
 			isFirst = false; // 只有广播过，才开始，因为会初始化两个广播类，这样就能少一个空跑的线程
+			broadcaster.getBroadcasterConfig().getBroadcasterCache().start();
 			startTimer();
 		}
 		try {

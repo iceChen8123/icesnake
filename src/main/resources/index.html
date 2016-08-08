@@ -43,6 +43,8 @@
     Javascript and reload this page!</h2></noscript>
     <h3 style="color: red;">生存守则:不要撞别人的身体^_^</h3>
     <hr>
+    <div id='nameinfo' >名字:<input id="snakename" /><button onclick="submitname();">确认</button><hr></div>
+    
 <div style="float: left">
     <canvas id="playground" width="800" height="600"></canvas>
 </div>
@@ -70,6 +72,11 @@
 </table>
 </div>
 <script type="text/javascript">
+
+function submitname(){
+	$('#nameinfo').hide();
+	Game.socket.push('name:'+$('#snakename').val());
+}
 
 function go(direction){
 	Game.setDirection(direction);
@@ -198,7 +205,6 @@ Game.addSnake = function (id, color, headcolor) {
 Game.updateSnake = function (id, snakeBody) {
     if (typeof Game.entities[id] != "undefined") {
         Game.entities[id].snakeBody = snakeBody;
-        Game.entities[id].name = id;
     }
 };
 
@@ -206,6 +212,10 @@ Game.removeSnake = function (id) {
     Game.entities[id] = null;
     // Force GC.
     delete Game.entities[id];
+};
+
+Game.setSnakeName = function (id,name) {
+    Game.entities[id].name = name;
 };
 
 Game.run = (function () {
@@ -290,6 +300,9 @@ Game.connect = (function (host) {
                 for (var j = 0; j < packet.data.length; j++) {
                     Game.addSnake(packet.data[j].id, packet.data[j].color, packet.data[j].headcolor);
                 }
+                break;
+            case 'setname':
+                Game.setSnakeName(packet.id, packet.name);
                 break;
             case 'leave':
                 Game.removeSnake(packet.id);

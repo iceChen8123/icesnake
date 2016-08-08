@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,8 @@ public class SnakeManager implements Callable<String> {
 	private GameRule1 gameRule = new GameRule1();
 
 	public SnakeManager() {
-		this.snakeBroadcaster = new SnakeBroadcaster(BroadcasterFactory.getDefault().lookup("/snake", true), this);
+		Broadcaster lookupedBroadcast = BroadcasterFactory.getDefault().lookup("/snake", true);
+		this.snakeBroadcaster = new SnakeBroadcaster(lookupedBroadcast, this);
 	}
 
 	public synchronized void addNewPlaySnake(Snake snake) {
@@ -137,6 +139,10 @@ public class SnakeManager implements Callable<String> {
 		} else {
 			activeWaitSnake();
 		}
+	}
+
+	public void loudMyName(int id, String name) {
+		snakeBroadcaster.broadcast(String.format("{'type': 'setname', 'id': '%s', 'name': '%s'}", id + "", name));
 	}
 
 }

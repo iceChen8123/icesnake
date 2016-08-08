@@ -22,7 +22,7 @@ public class OnopenProccesor {
 	public void onOpen(AtmosphereResource resource) throws IOException {
 		int id = snakeIds.getAndIncrement();
 		resource.session().setAttribute("id", id);
-		Snake snake = new Snake(id, resource);
+		Snake snake = new Snake(id, resource, snakeManager);
 		resource.session().setAttribute("snake", snake);
 
 		snakeManager.addNewPlaySnake(snake);
