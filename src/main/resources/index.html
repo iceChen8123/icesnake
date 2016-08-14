@@ -79,7 +79,10 @@ function submitname(){
 }
 
 function go(direction){
-	Game.setDirection(direction);
+	if (Game.direction != 'right' && direction == 'left') Game.setDirection('left');
+    if (Game.direction != 'down' && direction == 'up') Game.setDirection('up');
+    if (Game.direction != 'left' && direction == 'right') Game.setDirection('right');
+    if (Game.direction != 'up' && direction == 'down') Game.setDirection('down');
 }
 
 var Game = {};
